@@ -1,0 +1,11 @@
+log2(entries) ::=<<
+<entries; separator="\n">
+>>
+
+entry(timestamp,message) ::=<<
+<timestamp> <message>
+>>
+
+literal(text) ::=<<
+<text>
+>>
