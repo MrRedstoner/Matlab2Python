@@ -1,0 +1,24 @@
+fullTranslation(imports,defs,translation_unit) ::=<<
+<imports; separator="\n">
+
+<defs; separator="\n\n">
+
+<translation_unit>
+>>
+
+assignment_expression(postfix_expression,expression) ::=<<
+<postfix_expression> = <expression>
+>>
+
+statement_list(statement_list,statement) ::=<<
+<statement_list>
+<statement>
+>>
+
+pass() ::=<<
+pass
+>>
+
+literal(text) ::=<<
+<text>
+>>
