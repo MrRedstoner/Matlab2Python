@@ -6,6 +6,18 @@ fullTranslation(imports,defs,translation_unit) ::=<<
 <translation_unit>
 >>
 
+bracketed_expression(expression) ::=<<
+(<expression>)
+>>
+
+unary_operator_expression(operator,expression) ::=<<
+<operator> <expression>
+>>
+
+binary_operator_expression(expression0,operator,expression1) ::=<<
+<expression0> <operator> <expression1>
+>>
+
 assignment_expression(postfix_expression,expression) ::=<<
 <postfix_expression> = <expression>
 >>

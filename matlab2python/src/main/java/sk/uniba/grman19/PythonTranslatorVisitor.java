@@ -91,6 +91,10 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			//option CONSTANT
 			return literal(ctx.getText());
 		}
+		if(ctx.expression()!=null) {
+			//option '(' expression ')'
+			return template("bracketed_expression").add("expression", ctx.expression().accept(this));
+		}
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
@@ -128,13 +132,22 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		if(ctx.unary_operator()==null) {
 			//option postfix_expression
 			return ctx.postfix_expression().accept(this);
+		} else {
+			//option unary_operator postfix_expression
+			return template("unary_operator_expression")
+						.add("operator", ctx.unary_operator().accept(this))
+						.add("expression", ctx.postfix_expression().accept(this));
 		}
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Fragment visitUnary_operator(Unary_operatorContext ctx) {
+		switch(ctx.getChild(0).getText()) {
+		//option '+'
+		case "+": return literal("+");
+		//option '-'
+		case "-": return literal("-");
+		}
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
@@ -144,6 +157,23 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		if(ctx.multiplicative_expression()==null) {
 			//option unary_expression
 			return ctx.unary_expression().accept(this);
+		} else {
+			//option multiplicative_expression '*' unary_expression
+			//option multiplicative_expression '/' unary_expression
+			//option multiplicative_expression '\\' unary_expression
+			//option multiplicative_expression '^' unary_expression
+			//option multiplicative_expression ARRAYMUL unary_expression
+			//option multiplicative_expression ARRAYDIV unary_expression
+			//option multiplicative_expression ARRAYRDIV unary_expression
+			//option multiplicative_expression ARRAYPOW unary_expression
+			switch(ctx.getChild(1).getText()) {
+			case "*":{
+				return template("binary_operator_expression")
+						.add("expression0", ctx.multiplicative_expression().accept(this))
+						.add("operator", "*")
+						.add("expression1", ctx.unary_expression().accept(this));
+			}
+			}
 		}
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
@@ -154,9 +184,14 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		if(ctx.additive_expression()==null) {
 			//option multiplicative_expression
 			return ctx.multiplicative_expression().accept(this);
+		} else {
+			//option additive_expression '+' multiplicative_expression
+			//option additive_expression '-' multiplicative_expression
+			return template("binary_operator_expression")
+						.add("expression0", ctx.additive_expression().accept(this))
+						.add("operator", ctx.getChild(1).getText())
+						.add("expression1", ctx.multiplicative_expression().accept(this));
 		}
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
 	}
 
 	@Override
