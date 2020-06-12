@@ -54,6 +54,11 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		return template("literal").add("text", value);
 	}
 	
+	private String pythonString(String text) {
+		//matlab escapes ' as '', Python as \'
+		return text.replace("''", "\\'");
+	}
+	
 	PythonTranslatorVisitor(STGroup templates){
 		this.templates=templates;
 	}
@@ -90,6 +95,10 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		if(ctx.CONSTANT()!=null) {
 			//option CONSTANT
 			return literal(ctx.getText());
+		}
+		if(ctx.STRING_LITERAL()!=null) {
+			//option STRING_LITERAL
+			return literal(pythonString(ctx.STRING_LITERAL().getText()));
 		}
 		if(ctx.expression()!=null) {
 			//option '(' expression ')'

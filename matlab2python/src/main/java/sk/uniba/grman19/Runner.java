@@ -13,7 +13,8 @@ public class Runner {
 		PythonTranslatorVisitor ptv=new PythonTranslatorVisitor(templates);
 		
 		String content="a = + 10 + 5 + 6 +7\n"
-				+ "b = (3 + (5 - 1)) * -2\n";
+				+ "b = (3 + (5 - 1)) * -2\n"
+				+ "c = 'An ''\"apostrophe\"'' string.'\n";
 
 		MatlabLexer lexer=new MatlabLexer(CharStreams.fromString(content));
 
