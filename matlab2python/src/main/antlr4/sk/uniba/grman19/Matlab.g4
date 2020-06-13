@@ -1,6 +1,6 @@
 /*
 from https://github.com/antlr/grammars-v4/blob/master/matlab/matlab.g4
-with modified STRING_LITERAL to fix parsing issue
+with modified NUMBER to permit .5 as alternative style to 0.5
 */
 /*
 BSD License
@@ -354,6 +354,7 @@ CONSTANT
 
 fragment NUMBER
    : ('0' .. '9') + ('.' ('0' .. '9') +)?
+   | '.' ('0' .. '9') +
    ;
 
 

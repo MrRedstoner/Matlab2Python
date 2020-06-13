@@ -12,12 +12,15 @@ public class Runner {
 		
 		PythonTranslatorVisitor ptv=new PythonTranslatorVisitor(templates);
 		
-		String content="a = + 10 + 5 + 6 +7\n"
+		String content="d = + 10 + 5 + 6 +7\n"
 				+ "b = (3 + (5 - 1)) * -2\n"
 				+ "c = 'An ''\"apostrophe\"'' string.'\n"
 				+ "for i=2:20\n"
-				+ "    d =d+i\n"
-				+ "end\n";
+				+ "    d =d+sqrt(i);;\n"
+				+ "end\n"
+				+ "pause(.5)\n"
+				+ "fprintf('''d'' je %d', d)\n"
+				+ "[X,Y] = meshgrid(a,b)\n";
 
 		MatlabLexer lexer=new MatlabLexer(CharStreams.fromString(content));
 

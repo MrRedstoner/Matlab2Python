@@ -1,5 +1,16 @@
 package sk.uniba.grman19;
 
+import static sk.uniba.grman19.util.PythonDef.FPLOT;
+import static sk.uniba.grman19.util.PythonDef.FUNC2STR;
+import static sk.uniba.grman19.util.PythonDef.PRINTF;
+import static sk.uniba.grman19.util.PythonDef.SURFC;
+import static sk.uniba.grman19.util.PythonImport.AXES3D;
+import static sk.uniba.grman19.util.PythonImport.INSPECT;
+import static sk.uniba.grman19.util.PythonImport.NUMPY;
+import static sk.uniba.grman19.util.PythonImport.PYPLOT;
+import static sk.uniba.grman19.util.PythonImport.SLEEP;
+import static sk.uniba.grman19.util.PythonImport.SQRT;
+
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
@@ -56,7 +67,8 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	
 	private String pythonString(String text) {
 		//matlab escapes ' as '', Python as \'
-		return text.replace("''", "\\'");
+		//make sure not to clobber the outer '
+		return "'"+text.substring(1, text.length()-1).replace("''", "\\'")+"'";
 	}
 	
 	PythonTranslatorVisitor(STGroup templates){
@@ -104,6 +116,13 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			//option '(' expression ')'
 			return template("bracketed_expression").add("expression", ctx.expression().accept(this));
 		}
+		if(ctx.array_list()!=null) {
+			//option '[' array_list ']'
+			//is this the lhs?
+			if(ctx.getParent() instanceof Postfix_expressionContext && ctx.getParent().getParent() instanceof Assignment_expressionContext) {
+				return ctx.array_list().accept(this);
+			}
+		}
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
@@ -114,26 +133,113 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			//option primary_expression
 			return ctx.primary_expression().accept(this);
 		}
+		if(ctx.array_expression()!=null) {
+			//option array_expression
+			return ctx.array_expression().accept(this);
+		}
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Fragment visitIndex_expression(Index_expressionContext ctx) {
+		if(ctx.expression()!=null) {
+			//option expression
+			return ctx.expression().accept(this);
+		}
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Fragment visitIndex_expression_list(Index_expression_listContext ctx) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		if(ctx.index_expression_list()==null) {
+			//option index_expression
+			return ctx.index_expression().accept(this);
+		} else {
+			//option index_expression_list ',' index_expression
+			return template("comma_separated")
+						.add("list", ctx.index_expression_list().accept(this))
+						.add("element", ctx.index_expression().accept(this));
+		}
 	}
 
 	@Override
 	public Fragment visitArray_expression(Array_expressionContext ctx) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		//IDENTIFIER '(' index_expression_list ')'
+		//used as a function call
+		String identifier = ctx.IDENTIFIER().getText();
+		
+		Fragment ret=template("function_call");
+		Fragment argList=ctx.index_expression_list().accept(this);
+						
+		//add imports and defs as needed
+		switch(identifier) {
+		case"fprintf":{
+			ret.addDef(PRINTF);
+			identifier="printf";
+		}break;
+		case"func2str":{
+			ret.addImport(INSPECT).addDef(FUNC2STR);
+		}break;
+		case"linspace":{
+			ret.addImport(NUMPY);
+			identifier="np.linspace";
+		}break;
+		case"meshgrid":{
+			ret.addImport(NUMPY);
+			identifier="np.meshgrid";
+		}break;
+		case"pause":{
+			ret.addImport(SLEEP);
+			identifier="sleep";
+		}break;
+		case"size":{
+			identifier="len";
+			//toss the second argument
+			assert ctx.index_expression_list().index_expression_list()!=null;
+			argList=ctx.index_expression_list().index_expression_list().accept(this);
+		}break;
+		case"zeros":{
+			ret.addImport(NUMPY);
+			identifier="np.ma.zeros";
+		}break;
+		case"sqrt":{
+			ret.addImport(SQRT);
+		}break;
+		case"title":{
+			ret.addImport(PYPLOT);
+			identifier="plt.title";
+		}break;
+		case"plot":{
+			ret.addImport(PYPLOT);
+			identifier="plt.plot";
+		}break;
+		case"legend":{
+			ret.addImport(PYPLOT);
+			identifier="plt.legend";
+			//wrap in []
+			argList=template("square_bracketed_expression").add("expression", argList);
+		}break;
+		case"surfc":{
+			ret.addImport(PYPLOT).addImport(AXES3D).addDef(SURFC);
+		}break;
+		case"contour":{
+			ret.addImport(PYPLOT);
+			identifier="plt.contour";
+		}break;
+		case"figure":{
+			ret.addImport(PYPLOT);
+			identifier="plt.figure";
+		}break;
+		case"fplot":{
+			ret.addImport(NUMPY).addImport(PYPLOT).addDef(FPLOT);
+		}break;
+		}
+
+		return ret
+				.add("name", identifier)
+				.add("arg_list", argList);
 	}
 
 	@Override
@@ -281,17 +387,14 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	public Fragment visitStatement(StatementContext ctx) {
 		if(ctx.assignment_statement()!=null) {
 			//option assignment_statement
-			//no need to wrap
 			return ctx.assignment_statement().accept(this);
 		}
 		if(ctx.expression_statement()!=null) {
 			//option expression_statement
-			//no need to wrap
 			return ctx.expression_statement().accept(this);
 		}
 		if(ctx.iteration_statement()!=null) {
 			//option assignment_statement
-			//no need to wrap
 			return ctx.iteration_statement().accept(this);
 		}
 		// TODO Auto-generated method stub
@@ -302,12 +405,19 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	public Fragment visitStatement_list(Statement_listContext ctx) {
 		if(ctx.statement_list()==null) {
 			//option statement
-			//no need to wrap
 			return ctx.statement().accept(this);
 		} else {
 			//option statement_list statement
+			Fragment statementList=ctx.statement_list().accept(this);
+			if(statementList==null) {
+				return ctx.statement().accept(this);
+			}
+			Fragment statement=ctx.statement().accept(this);
+			if(statement==null) {
+				return statementList;
+			}
 			return template("statement_list")
-						.add("statement_list", ctx.statement_list().accept(this))
+						.add("statement_list", statementList)
 						.add("statement", ctx.statement().accept(this));
 		}
 	}
@@ -335,10 +445,9 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		if(ctx.expression()==null) {
 			//option eostmt
 			//noop command
-			return template("pass");
+			return null;
 		} else {
 			//option expression eostmt
-			//no need to wrap
 			return ctx.expression().accept(this);
 		}
 	}
@@ -351,14 +460,30 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 
 	@Override
 	public Fragment visitArray_element(Array_elementContext ctx) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		if(ctx.expression()==null) {
+			//option expression_statement
+			return ctx.expression_statement().accept(this);
+		} else {
+			//option expression
+			return ctx.expression().accept(this);
+		}
 	}
 
 	@Override
 	public Fragment visitArray_list(Array_listContext ctx) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		if(ctx.array_list()==null) {
+			//option array_element
+			return ctx.array_element().accept(this);
+		} else {
+			//option array_list array_element
+			Fragment element=ctx.array_element().accept(this);
+			if(element==null) {
+				return ctx.array_list().accept(this);
+			}
+			return template("comma_separated")
+						.add("list", ctx.array_list().accept(this))
+						.add("element", element);
+		}
 	}
 
 	@Override
@@ -378,10 +503,14 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		if(ctx.FOR()!=null) {
 			//option FOR IDENTIFIER '=' expression statement_list END eostmt
 			//option FOR '(' IDENTIFIER '=' expression ')' statement_list END eostmt
+			Fragment statementList=ctx.statement_list().accept(this);
+			if(statementList==null) {
+				statementList=template("pass");
+			}
 			return template("foreach")
 						.add("variable", literal(ctx.IDENTIFIER().getText()))
 						.add("iterable", ctx.expression().accept(this))
-						.add("statement_list", ctx.statement_list().accept(this));
+						.add("statement_list", statementList);
 		}
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
@@ -397,7 +526,6 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	public Fragment visitTranslation_unit(Translation_unitContext ctx) {
 		if(ctx.FUNCTION()==null) {
 			//option: statement_list
-			//no need to wrap it
 			return ctx.statement_list().accept(this);
 		} else {
 			//option: FUNCTION function_declare eostmt statement_list

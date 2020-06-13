@@ -36,12 +36,16 @@ public class Fragment {
 		return this;
 	}
 	
-	public void addImport(PythonImport value) {
+	/**@return this to allow chaining*/
+	public Fragment addImport(PythonImport value) {
 		imports.add(value);
+		return this;
 	}
 	
-	public void addDef(PythonDef value) {
+	/**@return this to allow chaining*/
+	public Fragment addDef(PythonDef value) {
 		defs.add(value);
+		return this;
 	}
 	
 	public String getFullTranslation(ST fullTranslation) {
