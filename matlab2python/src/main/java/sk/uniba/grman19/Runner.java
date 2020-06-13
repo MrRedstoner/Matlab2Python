@@ -14,7 +14,10 @@ public class Runner {
 		
 		String content="a = + 10 + 5 + 6 +7\n"
 				+ "b = (3 + (5 - 1)) * -2\n"
-				+ "c = 'An ''\"apostrophe\"'' string.'\n";
+				+ "c = 'An ''\"apostrophe\"'' string.'\n"
+				+ "for i=2:20\n"
+				+ "    d =d+i\n"
+				+ "end\n";
 
 		MatlabLexer lexer=new MatlabLexer(CharStreams.fromString(content));
 

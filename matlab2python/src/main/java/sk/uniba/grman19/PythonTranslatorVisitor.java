@@ -254,9 +254,14 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			return ctx.or_expression().accept(this);
 		} else {
 			//option expression ':' or_expression
+			//used as range, + 1 because matlab uses inclusive ranges
+			return template("range")
+						.add("start", ctx.expression().accept(this))
+						.add("stop", template("binary_operator_expression")
+								.add("expression0", template("bracketed_expression").add("expression", ctx.or_expression().accept(this)))
+								.add("operator", "+")
+								.add("expression1", "1"));
 		}
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -283,6 +288,11 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			//option expression_statement
 			//no need to wrap
 			return ctx.expression_statement().accept(this);
+		}
+		if(ctx.iteration_statement()!=null) {
+			//option assignment_statement
+			//no need to wrap
+			return ctx.iteration_statement().accept(this);
 		}
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
@@ -365,6 +375,14 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 
 	@Override
 	public Fragment visitIteration_statement(Iteration_statementContext ctx) {
+		if(ctx.FOR()!=null) {
+			//option FOR IDENTIFIER '=' expression statement_list END eostmt
+			//option FOR '(' IDENTIFIER '=' expression ')' statement_list END eostmt
+			return template("foreach")
+						.add("variable", literal(ctx.IDENTIFIER().getText()))
+						.add("iterable", ctx.expression().accept(this))
+						.add("statement_list", ctx.statement_list().accept(this));
+		}
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}

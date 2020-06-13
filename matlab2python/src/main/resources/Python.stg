@@ -22,6 +22,15 @@ assignment_expression(postfix_expression,expression) ::=<<
 <postfix_expression> = <expression>
 >>
 
+foreach(variable,iterable,statement_list) ::=<<
+for <variable> in <iterable>:
+    <statement_list>
+>>
+
+range(start,stop) ::=<<
+range(<start>,<stop>)
+>>
+
 statement_list(statement_list,statement) ::=<<
 <statement_list>
 <statement>
