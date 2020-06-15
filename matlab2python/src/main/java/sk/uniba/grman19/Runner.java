@@ -20,7 +20,14 @@ public class Runner {
 				+ "end\n"
 				+ "pause(.5)\n"
 				+ "fprintf('''d'' je %d', d)\n"
-				+ "[X,Y] = meshgrid(a,b)\n";
+				+ "[X,Y] = meshgrid(a,b)\n"
+				+ "if b>= c\n"
+				+ "    while( d>10 )\n"
+				+ "        d = d - 5\n"
+				+ "    end\n"
+				+ "else\n"
+				+ "    ;"
+				+ "end\n";
 
 		MatlabLexer lexer=new MatlabLexer(CharStreams.fromString(content));
 

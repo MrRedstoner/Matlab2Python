@@ -1,6 +1,7 @@
 fullTranslation(imports,defs,translation_unit) ::=<<
 <imports; separator="\n">
 
+
 <defs; separator="\n\n">
 
 <translation_unit>
@@ -24,6 +25,23 @@ binary_operator_expression(expression0,operator,expression1) ::=<<
 
 assignment_expression(postfix_expression,expression) ::=<<
 <postfix_expression> = <expression>
+>>
+
+pureif(condition, statement_list) ::=<<
+if <condition>:
+    <statement_list>
+>>
+
+ifelse(condition, statement_list0,statement_list1) ::=<<
+if <condition>:
+    <statement_list0>
+else:
+    <statement_list1>
+>>
+
+while_loop(condition, statement_list) ::=<<
+while <condition>:
+    <statement_list>
 >>
 
 foreach(variable,iterable,statement_list) ::=<<

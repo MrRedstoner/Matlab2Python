@@ -11,6 +11,8 @@ import static sk.uniba.grman19.util.PythonImport.PYPLOT;
 import static sk.uniba.grman19.util.PythonImport.SLEEP;
 import static sk.uniba.grman19.util.PythonImport.SQRT;
 
+import java.util.Optional;
+
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
@@ -314,9 +316,16 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		if(ctx.relational_expression()==null) {
 			//option additive_expression
 			return ctx.additive_expression().accept(this);
+		} else {
+			//option relational_expression '<' additive_expression
+			//option relational_expression '>' additive_expression
+			//option relational_expression LE_OP additive_expression
+			//option relational_expression GE_OP additive_expression
+			return template("binary_operator_expression")
+					.add("expression0", ctx.relational_expression().accept(this))
+					.add("operator", ctx.getChild(1).getText())
+					.add("expression1", ctx.additive_expression().accept(this));
 		}
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -393,8 +402,12 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			//option expression_statement
 			return ctx.expression_statement().accept(this);
 		}
+		if(ctx.selection_statement()!=null) {
+			//option selection_statement
+			return ctx.selection_statement().accept(this);
+		}
 		if(ctx.iteration_statement()!=null) {
-			//option assignment_statement
+			//option iteration_statement
 			return ctx.iteration_statement().accept(this);
 		}
 		// TODO Auto-generated method stub
@@ -488,6 +501,20 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 
 	@Override
 	public Fragment visitSelection_statement(Selection_statementContext ctx) {
+		if(ctx.elseif_clause()==null) {
+			if(ctx.ELSE()==null) {
+				//option IF expression statement_list END eostmt
+				return template("pureif")
+							.add("condition", ctx.expression().accept(this))
+							.add("statement_list", Optional.ofNullable(ctx.statement_list(0).accept(this)).orElse(template("pass")));
+			} else {
+				//option IF expression statement_list ELSE statement_list END eostmt
+				return template("ifelse")
+						.add("condition", ctx.expression().accept(this))
+						.add("statement_list0", Optional.ofNullable(ctx.statement_list(0).accept(this)).orElse(template("pass")))
+						.add("statement_list1", Optional.ofNullable(ctx.statement_list(1).accept(this)).orElse(template("pass")));
+			}
+		}
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
@@ -503,17 +530,16 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		if(ctx.FOR()!=null) {
 			//option FOR IDENTIFIER '=' expression statement_list END eostmt
 			//option FOR '(' IDENTIFIER '=' expression ')' statement_list END eostmt
-			Fragment statementList=ctx.statement_list().accept(this);
-			if(statementList==null) {
-				statementList=template("pass");
-			}
 			return template("foreach")
 						.add("variable", literal(ctx.IDENTIFIER().getText()))
 						.add("iterable", ctx.expression().accept(this))
-						.add("statement_list", statementList);
+						.add("statement_list", Optional.ofNullable(ctx.statement_list().accept(this)).orElse(template("pass")));
+		} else {
+			//option WHILE expression statement_list END eostmt
+			return template("while_loop")
+						.add("condition", ctx.expression().accept(this))
+						.add("statement_list", Optional.ofNullable(ctx.statement_list().accept(this)).orElse(template("pass")));
 		}
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
 	}
 
 	@Override
