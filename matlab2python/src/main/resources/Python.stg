@@ -66,6 +66,10 @@ comma_separated(list,element) ::=<<
 <list>, <element>
 >>
 
+comment(text) ::=<<
+# <text>
+>>
+
 pass() ::=<<
 pass
 >>

@@ -412,6 +412,11 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			//option iteration_statement
 			return ctx.iteration_statement().accept(this);
 		}
+		if(ctx.COMMENT_STATEMENT()!=null) {
+			//option COMMENT_STATEMENT
+			return template("comment")
+						.add("text", ctx.COMMENT_STATEMENT().getText().substring(1));
+		}
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}

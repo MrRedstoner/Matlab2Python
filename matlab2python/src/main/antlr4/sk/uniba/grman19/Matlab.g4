@@ -1,6 +1,7 @@
 /*
 from https://github.com/antlr/grammars-v4/blob/master/matlab/matlab.g4
 with modified NUMBER to permit .5 as alternative style to 0.5
+added COMMENT_STATEMENT support
 */
 /*
 BSD License
@@ -143,6 +144,7 @@ statement
    | selection_statement
    | iteration_statement
    | jump_statement
+   | COMMENT_STATEMENT
    ;
 
 statement_list
@@ -231,6 +233,10 @@ function_declare
    | func_return_list '=' function_declare_lhs
    ;
 
+
+COMMENT_STATEMENT
+   : '%' ( ~ '\n' ) * '\n'
+   ;
 
 ARRAYMUL
    : '.*'
