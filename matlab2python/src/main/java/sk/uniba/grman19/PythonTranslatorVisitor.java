@@ -57,6 +57,8 @@ import sk.uniba.grman19.util.Fragment;
 
 public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	
+	//TODO write translator tests
+	
 	private final STGroup templates;
 	
 	private Fragment template(String name) {
@@ -73,7 +75,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		return "'"+text.substring(1, text.length()-1).replace("''", "\\'")+"'";
 	}
 	
-	PythonTranslatorVisitor(STGroup templates){
+	protected PythonTranslatorVisitor(STGroup templates){
 		this.templates=templates;
 	}
 
