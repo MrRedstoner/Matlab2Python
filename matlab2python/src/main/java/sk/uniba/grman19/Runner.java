@@ -14,6 +14,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.stringtemplate.v4.STGroup;
@@ -28,7 +29,8 @@ public class Runner {
 			.addOption("i", "input", true, "Input file path, or - to read from stdin")
 			.addOption("o", "output", true, "Override default output directory")
 			.addOption("l", "logfile", true, "Redirect stderr")
-			.addOption("v", "verbose", false, "More verbose output");
+			.addOption("v", "verbose", false, "More verbose output")
+			.addOption("h", "help", false, "Print help");
 		return options;
 	}
 	
@@ -58,6 +60,12 @@ public class Runner {
 		CommandLine cmd = parser.parse(getOptions(), args);
 		
 		STGroup templates = new STGroupFile("Python.stg");
+		
+		if(cmd.hasOption("help")) {
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp("java -jar Mat2Pyt.jar", getOptions());
+			System.exit(0);
+		}
 		
 		String fromFile=Optional.ofNullable(cmd.getOptionValue("input")).orElse(".");
 		String toFile=cmd.getOptionValue("output");
