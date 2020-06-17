@@ -74,6 +74,14 @@ pass() ::=<<
 pass
 >>
 
+return() ::=<<
+return
+>>
+
+break() ::=<<
+break
+>>
+
 literal(text) ::=<<
 <text>
 >>

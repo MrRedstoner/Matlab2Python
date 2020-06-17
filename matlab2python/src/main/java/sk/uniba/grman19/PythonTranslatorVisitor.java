@@ -37,6 +37,7 @@ import sk.uniba.grman19.MatlabParser.Func_return_listContext;
 import sk.uniba.grman19.MatlabParser.Function_declareContext;
 import sk.uniba.grman19.MatlabParser.Function_declare_lhsContext;
 import sk.uniba.grman19.MatlabParser.Global_statementContext;
+import sk.uniba.grman19.MatlabParser.Hold_statementContext;
 import sk.uniba.grman19.MatlabParser.Identifier_listContext;
 import sk.uniba.grman19.MatlabParser.Index_expressionContext;
 import sk.uniba.grman19.MatlabParser.Index_expression_listContext;
@@ -126,6 +127,8 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			if(ctx.getParent() instanceof Postfix_expressionContext && ctx.getParent().getParent() instanceof Assignment_expressionContext) {
 				return ctx.array_list().accept(this);
 			}
+			//return as a python list
+			return template("bracketed_expression").add("expression", ctx.array_list().accept(this));
 		}
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
@@ -286,10 +289,12 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			//option multiplicative_expression ARRAYRDIV unary_expression
 			//option multiplicative_expression ARRAYPOW unary_expression
 			switch(ctx.getChild(1).getText()) {
-			case "*":{
+			case "*":
+			case "/":
+			{
 				return template("binary_operator_expression")
 						.add("expression0", ctx.multiplicative_expression().accept(this))
-						.add("operator", "*")
+						.add("operator", ctx.getChild(1).getText())
 						.add("expression1", ctx.unary_expression().accept(this));
 			}
 			}
@@ -412,13 +417,22 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			//option iteration_statement
 			return ctx.iteration_statement().accept(this);
 		}
+		if(ctx.jump_statement()!=null) {
+			//option jump_statement
+			return ctx.jump_statement().accept(this);
+		}
 		if(ctx.COMMENT_STATEMENT()!=null) {
 			//option COMMENT_STATEMENT
 			return template("comment")
 						.add("text", ctx.COMMENT_STATEMENT().getText().substring(1));
 		}
+		if(ctx.hold_statement()!=null) {
+			//option hold_statement
+			return ctx.hold_statement().accept(this);
+		}
+		
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(ctx.getChild(0).getClass().getName());
 	}
 
 	@Override
@@ -551,8 +565,13 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 
 	@Override
 	public Fragment visitJump_statement(Jump_statementContext ctx) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		if(ctx.BREAK()!=null) {
+			//option BREAK eostmt
+			return template("break");
+		} else {
+			//option RETURN eostmt
+			return template("return");
+		}
 	}
 
 	@Override
@@ -589,5 +608,10 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	public Fragment visitFunction_declare(Function_declareContext ctx) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Fragment visitHold_statement(Hold_statementContext ctx) {
+		return template("comment").add("text", ctx.getText());
 	}
 }

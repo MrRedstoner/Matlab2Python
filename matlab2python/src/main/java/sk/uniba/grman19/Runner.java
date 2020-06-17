@@ -153,7 +153,7 @@ public class Runner {
 				//just translate the one file
 				if(toFile==null) {
 					//use the same dir
-					outFile=inFile;
+					outFile=inFile.getParentFile();
 				} else {
 					outFile=new File(toFile);
 				}

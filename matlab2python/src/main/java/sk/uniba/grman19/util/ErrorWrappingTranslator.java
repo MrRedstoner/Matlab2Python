@@ -24,6 +24,7 @@ import sk.uniba.grman19.MatlabParser.Func_return_listContext;
 import sk.uniba.grman19.MatlabParser.Function_declareContext;
 import sk.uniba.grman19.MatlabParser.Function_declare_lhsContext;
 import sk.uniba.grman19.MatlabParser.Global_statementContext;
+import sk.uniba.grman19.MatlabParser.Hold_statementContext;
 import sk.uniba.grman19.MatlabParser.Identifier_listContext;
 import sk.uniba.grman19.MatlabParser.Index_expressionContext;
 import sk.uniba.grman19.MatlabParser.Index_expression_listContext;
@@ -391,6 +392,15 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 	public Fragment visitFunction_declare(Function_declareContext ctx) {
 		try {
 			return super.visitFunction_declare(ctx);
+		}catch(Exception e) {
+			return error(e.getClass().getName());
+		}
+	}
+	
+	@Override
+	public Fragment visitHold_statement(Hold_statementContext ctx) {
+		try {
+			return super.visitHold_statement(ctx);
 		}catch(Exception e) {
 			return error(e.getClass().getName());
 		}

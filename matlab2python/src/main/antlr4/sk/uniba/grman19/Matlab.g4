@@ -1,7 +1,7 @@
 /*
 from https://github.com/antlr/grammars-v4/blob/master/matlab/matlab.g4
 with modified NUMBER to permit .5 as alternative style to 0.5
-added COMMENT_STATEMENT support
+added COMMENT_STATEMENT, hold_statement support
 */
 /*
 BSD License
@@ -145,6 +145,7 @@ statement
    | iteration_statement
    | jump_statement
    | COMMENT_STATEMENT
+   | hold_statement
    ;
 
 statement_list
@@ -233,6 +234,10 @@ function_declare
    | func_return_list '=' function_declare_lhs
    ;
 
+hold_statement
+   : 'hold on' eostmt
+   | 'hold off' eostmt
+   ;
 
 COMMENT_STATEMENT
    : '%' ( ~ '\n' ) * '\n'
