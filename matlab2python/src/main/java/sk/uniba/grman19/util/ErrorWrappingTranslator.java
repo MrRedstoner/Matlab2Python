@@ -49,6 +49,10 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 	private Fragment error(String text) {
 		return new Fragment(templates.getInstanceOf("literal").add("text", "<error: "+text+">"));
 	}
+	
+	private Fragment error(Exception e) {
+		return error(e.getClass().getName());
+	}
 
 	public ErrorWrappingTranslator(STGroup templates) {
 		super(templates);
@@ -60,7 +64,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visit(tree);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -69,7 +73,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitChildren(node);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -78,7 +82,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitTerminal(node);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -87,7 +91,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitErrorNode(node);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -96,7 +100,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitPrimary_expression(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -105,7 +109,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitPostfix_expression(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -114,7 +118,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitIndex_expression(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -123,7 +127,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitIndex_expression_list(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -132,7 +136,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitArray_expression(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -141,7 +145,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitUnary_expression(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -150,7 +154,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitUnary_operator(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -159,7 +163,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitMultiplicative_expression(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -168,7 +172,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitAdditive_expression(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -177,7 +181,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitRelational_expression(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -186,7 +190,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitEquality_expression(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -195,7 +199,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitAnd_expression(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -204,7 +208,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitOr_expression(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -213,7 +217,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitExpression(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -222,7 +226,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitAssignment_expression(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -231,7 +235,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitEostmt(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -240,7 +244,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitStatement(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -249,7 +253,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitStatement_list(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -258,7 +262,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitIdentifier_list(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -267,7 +271,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitGlobal_statement(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -276,7 +280,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitClear_statement(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -285,7 +289,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitExpression_statement(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -294,7 +298,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitAssignment_statement(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -303,7 +307,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitArray_element(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -312,7 +316,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitArray_list(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -321,7 +325,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitSelection_statement(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -330,7 +334,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitElseif_clause(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -339,7 +343,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitIteration_statement(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -348,7 +352,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitJump_statement(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -357,7 +361,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitTranslation_unit(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -366,7 +370,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitFunc_ident_list(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -375,7 +379,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitFunc_return_list(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -384,7 +388,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitFunction_declare_lhs(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 
@@ -393,7 +397,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitFunction_declare(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 	
@@ -402,7 +406,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 		try {
 			return super.visitHold_statement(ctx);
 		}catch(Exception e) {
-			return error(e.getClass().getName());
+			return error(e);
 		}
 	}
 }
