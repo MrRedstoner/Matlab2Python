@@ -43,6 +43,7 @@ import sk.uniba.grman19.MatlabParser.Index_expressionContext;
 import sk.uniba.grman19.MatlabParser.Index_expression_listContext;
 import sk.uniba.grman19.MatlabParser.Iteration_statementContext;
 import sk.uniba.grman19.MatlabParser.Jump_statementContext;
+import sk.uniba.grman19.MatlabParser.Lambda_definitionContext;
 import sk.uniba.grman19.MatlabParser.Multiplicative_expressionContext;
 import sk.uniba.grman19.MatlabParser.Or_expressionContext;
 import sk.uniba.grman19.MatlabParser.Postfix_expressionContext;
@@ -288,19 +289,23 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			//option multiplicative_expression ARRAYDIV unary_expression
 			//option multiplicative_expression ARRAYRDIV unary_expression
 			//option multiplicative_expression ARRAYPOW unary_expression
+			String operator=null;
 			switch(ctx.getChild(1).getText()) {
-			case "*":
-			case "/":
-			{
-				return template("binary_operator_expression")
-						.add("expression0", ctx.multiplicative_expression().accept(this))
-						.add("operator", ctx.getChild(1).getText())
-						.add("expression1", ctx.unary_expression().accept(this));
+			case "*":operator="*";break;
+			case "/":operator="/";break;
+			
+			//downgrade to single-element operations
+			case ".^":operator="**";break;
+			
+			default:{
+				throw new UnsupportedOperationException();
 			}
 			}
+			return template("binary_operator_expression")
+					.add("expression0", ctx.multiplicative_expression().accept(this))
+					.add("operator", operator)
+					.add("expression1", ctx.unary_expression().accept(this));
 		}
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -371,6 +376,10 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 
 	@Override
 	public Fragment visitExpression(ExpressionContext ctx) {
+		if(ctx.lambda_definition()!=null) {
+			//option lambda_definition
+			return ctx.lambda_definition().accept(this);
+		}
 		if(ctx.expression()==null) {
 			//option or_expression
 			return ctx.or_expression().accept(this);
@@ -613,5 +622,13 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	@Override
 	public Fragment visitHold_statement(Hold_statementContext ctx) {
 		return template("comment").add("text", ctx.getText());
+	}
+
+	@Override
+	public Fragment visitLambda_definition(Lambda_definitionContext ctx) {
+		//'@(' index_expression_list ')' expression
+		return template("lambda")
+					.add("args", ctx.index_expression_list().accept(this))
+					.add("expression", ctx.expression().accept(this));
 	}
 }

@@ -30,6 +30,7 @@ import sk.uniba.grman19.MatlabParser.Index_expressionContext;
 import sk.uniba.grman19.MatlabParser.Index_expression_listContext;
 import sk.uniba.grman19.MatlabParser.Iteration_statementContext;
 import sk.uniba.grman19.MatlabParser.Jump_statementContext;
+import sk.uniba.grman19.MatlabParser.Lambda_definitionContext;
 import sk.uniba.grman19.MatlabParser.Multiplicative_expressionContext;
 import sk.uniba.grman19.MatlabParser.Or_expressionContext;
 import sk.uniba.grman19.MatlabParser.Postfix_expressionContext;
@@ -405,6 +406,15 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 	public Fragment visitHold_statement(Hold_statementContext ctx) {
 		try {
 			return super.visitHold_statement(ctx);
+		}catch(Exception e) {
+			return error(e);
+		}
+	}
+	
+	@Override
+	public Fragment visitLambda_definition(Lambda_definitionContext ctx) {
+		try {
+			return super.visitLambda_definition(ctx);
 		}catch(Exception e) {
 			return error(e);
 		}

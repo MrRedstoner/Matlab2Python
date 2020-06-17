@@ -1,7 +1,7 @@
 /*
 from https://github.com/antlr/grammars-v4/blob/master/matlab/matlab.g4
 with modified NUMBER to permit .5 as alternative style to 0.5
-added COMMENT_STATEMENT, hold_statement support
+added COMMENT_STATEMENT, hold_statement, lambda_definition support
 */
 /*
 BSD License
@@ -124,6 +124,11 @@ or_expression
 expression
    : or_expression
    | expression ':' or_expression
+   | lambda_definition
+   ;
+
+lambda_definition
+   : '@(' index_expression_list ')' expression
    ;
 
 assignment_expression
