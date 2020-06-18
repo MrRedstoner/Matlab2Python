@@ -307,6 +307,8 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			case "/":operator="/";break;
 			
 			//downgrade to single-element operations
+			case ".*":operator="*";break;
+			case "./":operator="/";break;
 			case ".^":operator="**";break;
 			
 			default:{
