@@ -8,6 +8,7 @@ import static sk.uniba.grman19.util.PythonImport.AXES3D;
 import static sk.uniba.grman19.util.PythonImport.INSPECT;
 import static sk.uniba.grman19.util.PythonImport.NUMPY;
 import static sk.uniba.grman19.util.PythonImport.PYPLOT;
+import static sk.uniba.grman19.util.PythonImport.RANDOM;
 import static sk.uniba.grman19.util.PythonImport.SLEEP;
 import static sk.uniba.grman19.util.PythonImport.SQRT;
 
@@ -179,7 +180,12 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		String identifier = ctx.IDENTIFIER().getText();
 		
 		Fragment ret=template("function_call");
-		Fragment argList=ctx.index_expression_list().accept(this);
+		Fragment argList;
+		if(ctx.index_expression_list()!=null) {
+			argList=ctx.index_expression_list().accept(this);
+		} else {
+			argList=template("empty");
+		}
 						
 		//add imports and defs as needed
 		switch(identifier) {
@@ -242,6 +248,12 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		}break;
 		case"fplot":{
 			ret.addImport(NUMPY).addImport(PYPLOT).addDef(FPLOT);
+		}break;
+		case"rand":{
+			//assuming no-arg variant
+			assert ctx.index_expression_list()==null;
+			ret.addImport(RANDOM);
+			identifier="random.random";
 		}break;
 		}
 
@@ -441,7 +453,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		}
 		
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException(ctx.getChild(0).getClass().getName());
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

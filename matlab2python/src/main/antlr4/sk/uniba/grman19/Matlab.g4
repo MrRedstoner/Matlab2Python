@@ -1,7 +1,11 @@
 /*
 from https://github.com/antlr/grammars-v4/blob/master/matlab/matlab.g4
 with modified NUMBER to permit .5 as alternative style to 0.5
-added COMMENT_STATEMENT, hold_statement, lambda_definition support
+added support for:
+ - comments
+ - hold on/off
+ - lambda_definitions
+ - no argument function calls
 */
 /*
 BSD License
@@ -66,6 +70,7 @@ index_expression_list
 
 array_expression
    : IDENTIFIER '(' index_expression_list ')'
+   | IDENTIFIER '()'
    ;
 
 unary_expression
