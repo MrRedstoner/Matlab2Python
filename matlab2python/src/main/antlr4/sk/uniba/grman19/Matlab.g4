@@ -6,8 +6,7 @@ added support for:
  - hold on/off
  - lambda_definitions
  - no argument function calls
-TODO
- - line continuation https://www.mathworks.com/help/matlab/matlab_prog/continue-long-statements-on-multiple-lines.html
+ - line continuation
 */
 /*
 BSD License
@@ -395,6 +394,9 @@ CR
    : [\r\n] +
    ;
 
+LINE_CONTINUATION
+: '...\n' -> skip
+;
 
 WS
    : [ \t] + -> skip

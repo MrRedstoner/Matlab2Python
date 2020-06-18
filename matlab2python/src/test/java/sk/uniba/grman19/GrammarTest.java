@@ -11,7 +11,8 @@ public class GrammarTest {
 	public void testSimpleProgram() {
 		//parse as translation_unit
 		String content=
-				"a=0;\n" +
+				"a=[0...\n" +
+				"1];\n" +
 				"for i = 1:10\n" +
 				"a = a+i;\n" +
 				"end\n" +
