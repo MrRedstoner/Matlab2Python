@@ -3,6 +3,7 @@ package sk.uniba.grman19;
 import static sk.uniba.grman19.util.PythonDef.FPLOT;
 import static sk.uniba.grman19.util.PythonDef.FUNC2STR;
 import static sk.uniba.grman19.util.PythonDef.PRINTF;
+import static sk.uniba.grman19.util.PythonDef.SIZE;
 import static sk.uniba.grman19.util.PythonDef.SURFC;
 import static sk.uniba.grman19.util.PythonImport.AXES3D;
 import static sk.uniba.grman19.util.PythonImport.INSPECT;
@@ -209,10 +210,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			identifier="sleep";
 		}break;
 		case"size":{
-			identifier="len";
-			//toss the second argument
-			assert ctx.index_expression_list().index_expression_list()!=null;
-			argList=ctx.index_expression_list().index_expression_list().accept(this);
+			ret.addDef(SIZE);
 		}break;
 		case"zeros":{
 			ret.addImport(NUMPY);
@@ -604,31 +602,59 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			return ctx.statement_list().accept(this);
 		} else {
 			//option: FUNCTION function_declare eostmt statement_list
+			//statement_list contains inner code, function_declare has name and return list
+			return ctx.function_declare().accept(this)
+						.add("statement_list", Optional.ofNullable(ctx.statement_list().accept(this)).orElse(template("pass")));
+			
 		}
 		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		//throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Fragment visitFunc_ident_list(Func_ident_listContext ctx) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		if(ctx.func_ident_list()==null) {
+			//option IDENTIFIER
+			return literal(ctx.IDENTIFIER().getText());
+		} else {
+			//option func_ident_list ',' IDENTIFIER
+			return template("comma_separated")
+					.add("list", ctx.func_ident_list().accept(this))
+					.add("element", literal(ctx.IDENTIFIER().getText()));
+		}
 	}
 
 	@Override
 	public Fragment visitFunc_return_list(Func_return_listContext ctx) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		if(ctx.IDENTIFIER()!=null) {
+			//option IDENTIFIER
+			return literal(ctx.IDENTIFIER().getText());
+		} else {
+			//option '[' func_ident_list ']'
+			return ctx.func_ident_list().accept(this);
+		}
 	}
 
 	@Override
 	public Fragment visitFunction_declare_lhs(Function_declare_lhsContext ctx) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		// IDENTIFIER
+		// IDENTIFIER '(' ')'
+		// IDENTIFIER '(' func_ident_list ')'
+		return template("function_def")
+					.add("name", literal(ctx.IDENTIFIER().getText()))
+					.add("args", Optional.ofNullable(ctx.func_ident_list()).map(fil->fil.accept(this)).orElse(template("empty")));
 	}
 
 	@Override
 	public Fragment visitFunction_declare(Function_declareContext ctx) {
+		//function_declare_lhs has name and args
+		if(ctx.func_return_list()==null) {
+			//option function_declare_lhs
+		} else {
+			//option func_return_list '=' function_declare_lhs
+			return ctx.function_declare_lhs().accept(this)
+						.add("return_list", ctx.func_return_list().accept(this));
+		}
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}

@@ -5,6 +5,11 @@ public enum PythonDef {
 			+ "    return inspect.getsource(f)\n"),
 	PRINTF("def printf(format_str, *args):\n" + 
 			"    print(format_str % args)\n"),
+	SIZE("def size(np_array, dimen=None):\n" + 
+			"    if dimen is None:\n" +
+			"        return np_array.shape\n" +
+			"    else:\n" +
+			"        return np_array.shape[dimen-1]\n"),//-1 to correct for different indexing
 	SURFC("def surfc(a, b, c):\n" + 
 			"    plt.figure().gca(projection=\"3d\").plot_surface(a, b, c)"),
 	FPLOT("def fplot(f, r):\n" + 
