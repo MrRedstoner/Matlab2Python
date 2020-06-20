@@ -23,6 +23,8 @@ import org.stringtemplate.v4.STGroupFile;
 import sk.uniba.grman19.util.ErrorWrappingTranslator;
 
 public class Runner {
+	//TODO:
+	//make ' work when used multiple times in a line
 	private static Options getOptions() {
 		Options options=new Options();
 		options

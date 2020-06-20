@@ -130,8 +130,11 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			if(ctx.getParent() instanceof Postfix_expressionContext && ctx.getParent().getParent() instanceof Assignment_expressionContext) {
 				return ctx.array_list().accept(this);
 			}
-			//return as a python list
-			return template("bracketed_expression").add("expression", ctx.array_list().accept(this));
+			//return as a numpy array
+			return template("function_call")
+						.addImport(NUMPY)
+						.add("name", "np.array")
+						.add("arg_list", template("bracketed_expression").add("expression", ctx.array_list().accept(this)));
 		}
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
@@ -263,8 +266,14 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	@Override
 	public Fragment visitUnary_expression(Unary_expressionContext ctx) {
 		if(ctx.unary_operator()==null) {
-			//option postfix_expression
-			return ctx.postfix_expression().accept(this);
+			if(ctx.getChildCount()==1) {
+				//option postfix_expression
+				return ctx.postfix_expression().accept(this);
+			} else {
+				//option postfix_expression '\''
+				//means the complex conjugate transpose
+				return template("conjT").add("in", ctx.postfix_expression().accept(this));//TODO
+			}
 		} else {
 			//option unary_operator postfix_expression
 			return template("unary_operator_expression")
@@ -303,8 +312,9 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			switch(ctx.getChild(1).getText()) {
 			case "*":operator="*";break;
 			case "/":operator="/";break;
+			case "^":operator="**";break;
 			
-			//downgrade to single-element operations
+			//numpy arrays make it map over the array automatically
 			case ".*":operator="*";break;
 			case "./":operator="/";break;
 			case ".^":operator="**";break;
@@ -607,8 +617,6 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 						.add("statement_list", Optional.ofNullable(ctx.statement_list().accept(this)).orElse(template("pass")));
 			
 		}
-		// TODO Auto-generated method stub
-		//throw new UnsupportedOperationException();
 	}
 
 	@Override

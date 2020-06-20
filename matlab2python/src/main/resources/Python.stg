@@ -93,6 +93,10 @@ break() ::=<<
 break
 >>
 
+conjT(in) ::=<<
+<in>.conj().T
+>>
+
 literal(text) ::=<<
 <text>
 >>

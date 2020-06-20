@@ -77,6 +77,7 @@ array_expression
 unary_expression
    : postfix_expression
    | unary_operator postfix_expression
+   | postfix_expression '\''
    ;
 
 unary_operator
@@ -393,6 +394,7 @@ fragment SIGN
 CR
    : [\r\n] +
    ;
+
 
 LINE_CONTINUATION
 : '...\n' -> skip
