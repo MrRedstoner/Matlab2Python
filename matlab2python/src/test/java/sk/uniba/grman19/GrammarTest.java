@@ -17,6 +17,7 @@ public class GrammarTest {
 				"a = a+i;\n" +
 				"end\n" +
 				"fprintf('''a'' je %d', a);\n" +
+				"z= x' + y'\n" +
 				"rand();\n";
 		
 		MatlabLexer lexer=new MatlabLexer(CharStreams.fromString(content));

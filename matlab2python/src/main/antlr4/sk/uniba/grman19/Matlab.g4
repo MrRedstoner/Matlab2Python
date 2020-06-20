@@ -7,6 +7,7 @@ added support for:
  - lambda_definitions
  - no argument function calls
  - line continuation
+ - ' operator including multiple on a line
 */
 /*
 BSD License
@@ -42,6 +43,40 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 grammar Matlab;
+
+@lexer::members {
+//based on https://stackoverflow.com/a/62483386/5511972
+//from https://github.com/bkiers/ecmascript-parser/blob/01b6c20917b16d2e7a9837809d7d9c6565b92673/src/main/antlr4/nl/bigo/ecmascriptparser/ECMAScript.g4#L773
+private Token lastToken;
+
+@Override
+public Token nextToken() {
+	// Get the next token.
+	Token next = super.nextToken();
+	if (next.getChannel() == Token.DEFAULT_CHANNEL) {
+		// Keep track of the last token on the default channel.
+		this.lastToken = next;
+	}
+	return next;
+}
+
+private boolean isStringPossible() {
+	if (this.lastToken == null) {
+		// Start of the input, a String is valid here
+		return true;
+	}
+	
+	switch (this.lastToken.getType()) {
+	//TODO check what others are needed here
+	case IDENTIFIER: 
+		// After these, no string literal can follow.
+		return false;
+	default:
+		// In all other cases, a string literal _is_ possible.
+		return true;
+	}
+}
+}
 
 primary_expression
    : IDENTIFIER
@@ -361,7 +396,7 @@ NCTRANSPOSE
 
 
 STRING_LITERAL
-   : '\'' ( ~ ( '\'' | '\n' ) | '\'\'') * '\''
+   : {isStringPossible()}? '\'' ( ~ ( '\'' | '\n' ) | '\'\'') * '\''
    ;
 
 
