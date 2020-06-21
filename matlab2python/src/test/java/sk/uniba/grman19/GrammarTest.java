@@ -25,6 +25,7 @@ public class GrammarTest {
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		
 		MatlabParser parser=new MatlabParser(tokens);
+		parser.setBuildParseTree(true);
 		
 		parser.translation_unit().getText();
 		

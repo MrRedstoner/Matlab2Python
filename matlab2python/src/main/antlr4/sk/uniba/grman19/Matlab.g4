@@ -233,10 +233,10 @@ array_list
    ;
 
 selection_statement
-   : IF expression statement_list END eostmt
-   | IF expression statement_list ELSE statement_list END eostmt
-   | IF expression statement_list elseif_clause END eostmt
-   | IF expression statement_list elseif_clause ELSE statement_list END eostmt
+   : IF expression CR statement_list END eostmt
+   | IF expression CR statement_list ELSE statement_list END eostmt
+   | IF expression CR statement_list elseif_clause END eostmt
+   | IF expression CR statement_list elseif_clause ELSE statement_list END eostmt
    ;
 
 elseif_clause
