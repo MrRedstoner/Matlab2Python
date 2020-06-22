@@ -21,10 +21,11 @@ import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import sk.uniba.grman19.util.ErrorWrappingTranslator;
+import sk.uniba.grman19.util.TreeUtils;
 
 public class Runner {
-	//TODO:
-	//make ' work when used multiple times in a line
+	private static boolean debug=false;
+	
 	private static Options getOptions() {
 		Options options=new Options();
 		options
@@ -32,20 +33,32 @@ public class Runner {
 			.addOption("o", "output", true, "Override default output directory")
 			.addOption("l", "logfile", true, "Redirect stderr")
 			.addOption("v", "verbose", false, "More verbose output")
+			.addOption("d", "debug", false, "Most verbose output, implies -v")
 			.addOption("h", "help", false, "Print help");
 		return options;
 	}
 	
 	/**@return true for success*/
 	private static boolean translate(STGroup templates, CharStream input, PrintStream out) {
-		PythonTranslatorVisitor ptv=new ErrorWrappingTranslator(templates);
+		PythonTranslatorVisitor ptv;
+		if(debug) {
+			ptv=new PythonTranslatorVisitor(templates);
+		} else {
+			ptv=new ErrorWrappingTranslator(templates);
+		}
 		
 		MatlabParser parser;
 		try {
 			MatlabLexer lexer=new MatlabLexer(input);
 			CommonTokenStream tokens = new CommonTokenStream(lexer);
 			parser = new MatlabParser(tokens);
+			if(debug) {
+				parser.setBuildParseTree(true);
+			}
 			ParseTree tree = parser.translation_unit();
+			if(debug) {
+				TreeUtils.dump(parser, tree);
+			}
 			
 			out.println(ptv.visit(tree).getFullTranslation(templates.getInstanceOf("fullTranslation")));
 			
@@ -71,7 +84,9 @@ public class Runner {
 		
 		String fromFile=Optional.ofNullable(cmd.getOptionValue("input")).orElse(".");
 		String toFile=cmd.getOptionValue("output");
-		boolean verbose=cmd.hasOption("verbose");
+		debug=cmd.hasOption("debug");
+		boolean verbose=cmd.hasOption("verbose")|debug;
+		
 		if(cmd.hasOption("logfile")) {
 			try {
 				System.setErr(new PrintStream(new File(cmd.getOptionValue("logfile"))));
@@ -176,5 +191,6 @@ public class Runner {
 				}
 			}
 		}
+		/**/
 	}
 }
