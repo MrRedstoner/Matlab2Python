@@ -79,6 +79,19 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		return "'"+text.substring(1, text.length()-1).replace("''", "\\'")+"'";
 	}
 	
+
+	private Fragment comment(String text) {
+		//at minimum contains the starting % and ending \n
+		if(text.charAt(2)==' ') {
+			//if the comment was already styled as "% text of comment"
+			text=text.substring(2, text.length()-1);
+		} else {
+			text=text.substring(1, text.length()-1);
+		}
+		return template("comment")
+				.add("text", text);
+	}
+	
 	protected PythonTranslatorVisitor(STGroup templates){
 		this.templates=templates;
 	}
@@ -454,8 +467,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		}
 		if(ctx.COMMENT_STATEMENT()!=null) {
 			//option COMMENT_STATEMENT
-			return template("comment")
-						.add("text", ctx.COMMENT_STATEMENT().getText().substring(1));
+			return comment(ctx.COMMENT_STATEMENT().getText());
 		}
 		if(ctx.hold_statement()!=null) {
 			//option hold_statement
