@@ -49,7 +49,7 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 	private final STGroup templates;
 	
 	private Fragment error(String text) {
-		return new Fragment(templates.getInstanceOf("literal").add("text", "<error: "+text+">"));
+		return new Fragment(templates.getInstanceOf("literal").add("text", "<error: "+text+">")).setError();
 	}
 	
 	private Fragment error(Exception e) {

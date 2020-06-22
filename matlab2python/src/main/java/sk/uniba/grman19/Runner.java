@@ -21,6 +21,7 @@ import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import sk.uniba.grman19.util.ErrorWrappingTranslator;
+import sk.uniba.grman19.util.Fragment;
 import sk.uniba.grman19.util.TreeUtils;
 
 public class Runner {
@@ -62,9 +63,11 @@ public class Runner {
 				TreeUtils.dump(parser, tree);
 			}
 			
-			out.println(ptv.visit(tree).getFullTranslation(templates.getInstanceOf("fullTranslation")));
+			Fragment result=ptv.visit(tree);
 			
-			return parser.getNumberOfSyntaxErrors()==0;
+			out.println(result.getFullTranslation(templates.getInstanceOf("fullTranslation")));
+			
+			return parser.getNumberOfSyntaxErrors()==0 && !result.hadError();
 		} catch (RecognitionException e) {
 			e.printStackTrace();
 			
@@ -107,9 +110,12 @@ public class Runner {
 					
 					boolean fine=translate(templates,CharStreams.fromStream(System.in),System.out);
 					
-					if(!fine)System.exit(1);
+					if(!fine) {
+						if(verbose)System.out.println("There was an error");
+						System.exit(1);
+					}
 				} catch (IOException e) {
-					e.printStackTrace();
+					if(debug)e.printStackTrace();
 					System.exit(2);
 				}
 			} else {
@@ -124,9 +130,12 @@ public class Runner {
 					
 					boolean fine=translate(templates,CharStreams.fromStream(System.in),new PrintStream(outFile));
 					
-					if(!fine)System.exit(1);
+					if(!fine) {
+						if(verbose)System.out.println("There was an error");
+						System.exit(1);
+					}
 				} catch (IOException e) {
-					e.printStackTrace();
+					if(debug)e.printStackTrace();
 					System.exit(2);
 				}
 			}
@@ -158,16 +167,23 @@ public class Runner {
 					try {
 						if(verbose)System.out.println("Translating "+matlab.getAbsolutePath()+" to "+python.getAbsolutePath());
 						
-						fine&=translate(templates,CharStreams.fromPath(matlab.toPath()),new PrintStream(python));
+						boolean fileFine=translate(templates,CharStreams.fromPath(matlab.toPath()),new PrintStream(python));
 						
+						if(!fileFine) {
+							if(verbose)System.out.println("There was an error");
+						}
+						
+						fine&=fileFine;
 					} catch (IOException e) {
-						e.printStackTrace();
+						if(debug)e.printStackTrace();
 						exception=true;
 					}
 				}
 
 				if(exception)System.exit(2);
-				if(!fine)System.exit(1);
+				if(!fine) {
+					System.exit(1);
+				}
 			} else {
 				//just translate the one file
 				if(toFile==null) {
@@ -186,9 +202,12 @@ public class Runner {
 					
 					boolean fine=translate(templates,CharStreams.fromPath(inFile.toPath()),new PrintStream(outFile));
 					
-					if(!fine)System.exit(1);
+					if(!fine) {
+						if(verbose)System.out.println("There was an error");
+						System.exit(1);
+					}
 				} catch (IOException e) {
-					e.printStackTrace();
+					if(debug)e.printStackTrace();
 					System.exit(2);
 				}
 			}

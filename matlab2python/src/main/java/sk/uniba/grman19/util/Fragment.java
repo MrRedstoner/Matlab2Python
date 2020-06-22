@@ -11,6 +11,7 @@ public class Fragment {
 	private final ST template;
 	private final EnumSet<PythonImport> imports;
 	private final EnumSet<PythonDef> defs;
+	private boolean error=false;
 	
 	public Fragment(ST template){
 		this(template,EnumSet.noneOf(PythonImport.class),EnumSet.noneOf(PythonDef.class));
@@ -22,11 +23,22 @@ public class Fragment {
 		this.defs=defs;
 	}
 	
+	public boolean hadError() {
+		return error;
+	}
+
+	/**@return this to allow chaining*/
+	public Fragment setError() {
+		error=true;
+		return this;
+	}
+	
 	/**@return this to allow chaining*/
 	public Fragment add(String key, Fragment value) {
 		template.add(key, value.template);
 		imports.addAll(value.imports);
 		defs.addAll(value.defs);
+		error|=value.error;
 		return this;
 	}
 	
