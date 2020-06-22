@@ -234,6 +234,7 @@ array_list
 
 selection_statement
    : IF expression expend statement_list END eostmt
+   | IF expression statement_list END eostmt
    | IF expression expend statement_list ELSE statement_list END eostmt
    | IF expression expend statement_list elseif_clause END eostmt
    | IF expression expend statement_list elseif_clause ELSE statement_list END eostmt

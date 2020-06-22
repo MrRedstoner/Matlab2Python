@@ -18,6 +18,7 @@ public class GrammarTest {
 				"end\n" +
 				"fprintf('''a'' je %d', a);\n" +
 				"z= x' + y'\n" +
+				"if d(a)>0 return; end\n" +
 				"rand();\n";
 		
 		MatlabLexer lexer=new MatlabLexer(CharStreams.fromString(content));
