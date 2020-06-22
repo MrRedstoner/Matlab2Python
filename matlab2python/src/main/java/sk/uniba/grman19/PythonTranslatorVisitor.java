@@ -32,6 +32,7 @@ import sk.uniba.grman19.MatlabParser.Clear_statementContext;
 import sk.uniba.grman19.MatlabParser.Elseif_clauseContext;
 import sk.uniba.grman19.MatlabParser.EostmtContext;
 import sk.uniba.grman19.MatlabParser.Equality_expressionContext;
+import sk.uniba.grman19.MatlabParser.ExpendContext;
 import sk.uniba.grman19.MatlabParser.ExpressionContext;
 import sk.uniba.grman19.MatlabParser.Expression_statementContext;
 import sk.uniba.grman19.MatlabParser.Func_ident_listContext;
@@ -690,5 +691,11 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		return template("lambda")
 					.add("args", ctx.index_expression_list().accept(this))
 					.add("expression", ctx.expression().accept(this));
+	}
+
+	@Override
+	public Fragment visitExpend(ExpendContext ctx) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException();
 	}
 }

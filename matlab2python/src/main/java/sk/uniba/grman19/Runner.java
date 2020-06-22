@@ -24,6 +24,8 @@ import sk.uniba.grman19.util.ErrorWrappingTranslator;
 import sk.uniba.grman19.util.TreeUtils;
 
 public class Runner {
+	//TODO:
+	//make graphing work nicely
 	private static boolean debug=false;
 	
 	private static Options getOptions() {

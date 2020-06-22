@@ -4,7 +4,7 @@ public enum PythonDef {
 	FUNC2STR("def func2str(f):\n"
 			+ "    return inspect.getsource(f)\n"),
 	PRINTF("def printf(format_str, *args):\n" + 
-			"    print(format_str % args)\n"),
+			"    print(format_str % args, end='')\n"),
 	SIZE("def size(np_array, dimen=None):\n" + 
 			"    if dimen is None:\n" +
 			"        return np_array.shape\n" +
