@@ -30,8 +30,8 @@ assignment_expression(postfix_expression,expression) ::=<<
 
 function_def(name,args,return_list,statement_list) ::=<<
 def <name>(<args>):
-	<statement_list>
-	return <return_list>
+    <statement_list>
+    return <return_list>
 >>
 
 pureif(condition, statement_list) ::=<<

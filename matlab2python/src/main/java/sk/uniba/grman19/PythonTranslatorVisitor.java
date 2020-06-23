@@ -148,7 +148,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			return template("function_call")
 						.addImport(NUMPY)
 						.add("name", "np.array")
-						.add("arg_list", template("bracketed_expression").add("expression", ctx.array_list().accept(this)));
+						.add("arg_list", template("square_bracketed_expression").add("expression", ctx.array_list().accept(this)));
 		}
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
