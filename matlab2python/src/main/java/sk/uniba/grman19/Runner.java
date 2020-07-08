@@ -27,6 +27,7 @@ import sk.uniba.grman19.util.TreeUtils;
 public class Runner {
 	//TODO:
 	//make graphing work nicely
+	//translate assignment lhs 'function calls' as indexing
 	private static boolean debug=false;
 	
 	private static Options getOptions() {

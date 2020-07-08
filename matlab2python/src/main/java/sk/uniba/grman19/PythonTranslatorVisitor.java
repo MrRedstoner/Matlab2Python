@@ -83,7 +83,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 
 	private Fragment comment(String text) {
 		//at minimum contains the starting % and ending \n
-		if(text.charAt(2)==' ') {
+		if(text.charAt(1)==' ') {
 			//if the comment was already styled as "% text of comment"
 			text=text.substring(2, text.length()-1);
 		} else {
@@ -622,7 +622,12 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	public Fragment visitTranslation_unit(Translation_unitContext ctx) {
 		if(ctx.FUNCTION()==null) {
 			//option: statement_list
-			return ctx.statement_list().accept(this);
+			Fragment result=ctx.statement_list().accept(this);
+			if(result==null) {
+				return template("pass");
+			} else {
+				return result;
+			}
 		} else {
 			//option: FUNCTION function_declare eostmt statement_list
 			//statement_list contains inner code, function_declare has name and return list
