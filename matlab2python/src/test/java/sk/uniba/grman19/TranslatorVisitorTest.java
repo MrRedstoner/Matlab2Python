@@ -178,4 +178,25 @@ public class TranslatorVisitorTest {
 		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
 		check(input,output,defs,imports);
 	}
+	
+	@Test
+	public void testPlotting() {
+		String input=program(true,
+				"f=linspace(0,4,100);",
+				"hold on",
+				"plot(f,f);",
+				"pause(2);",
+				"plot(2,2,'ro');",
+				"pause(5);");
+		String output=program(false,
+				"f = np.linspace(0, 4, 100)",
+				"# hold on",
+				"plot(f, f)",
+				"plt.pause(2)",
+				"plot(2, 2, 'ro')",
+				"plt.pause(5)");
+		EnumSet<PythonDef> defs=EnumSet.of(PythonDef.PLOT);
+		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY,PythonImport.PYPLOT);
+		check(input,output,defs,imports);
+	}
 }

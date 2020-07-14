@@ -2,6 +2,7 @@ package sk.uniba.grman19;
 
 import static sk.uniba.grman19.util.PythonDef.FPLOT;
 import static sk.uniba.grman19.util.PythonDef.FUNC2STR;
+import static sk.uniba.grman19.util.PythonDef.PLOT;
 import static sk.uniba.grman19.util.PythonDef.PRINTF;
 import static sk.uniba.grman19.util.PythonDef.SIZE;
 import static sk.uniba.grman19.util.PythonDef.SURFC;
@@ -10,7 +11,6 @@ import static sk.uniba.grman19.util.PythonImport.INSPECT;
 import static sk.uniba.grman19.util.PythonImport.NUMPY;
 import static sk.uniba.grman19.util.PythonImport.PYPLOT;
 import static sk.uniba.grman19.util.PythonImport.RANDOM;
-import static sk.uniba.grman19.util.PythonImport.SLEEP;
 import static sk.uniba.grman19.util.PythonImport.SQRT;
 
 import java.util.Optional;
@@ -223,8 +223,8 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			identifier="np.meshgrid";
 		}break;
 		case"pause":{
-			ret.addImport(SLEEP);
-			identifier="sleep";
+			ret.addImport(PYPLOT);
+			identifier="plt.pause";
 		}break;
 		case"size":{
 			ret.addDef(SIZE);
@@ -241,8 +241,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			identifier="plt.title";
 		}break;
 		case"plot":{
-			ret.addImport(PYPLOT);
-			identifier="plt.plot";
+			ret.addImport(PYPLOT).addDef(PLOT);
 		}break;
 		case"legend":{
 			ret.addImport(PYPLOT);
@@ -262,7 +261,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			identifier="plt.figure";
 		}break;
 		case"fplot":{
-			ret.addImport(NUMPY).addImport(PYPLOT).addDef(FPLOT);
+			ret.addImport(NUMPY).addImport(PYPLOT).addDef(PLOT).addDef(FPLOT);
 		}break;
 		case"rand":{
 			//assuming no-arg variant
@@ -622,12 +621,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	public Fragment visitTranslation_unit(Translation_unitContext ctx) {
 		if(ctx.FUNCTION()==null) {
 			//option: statement_list
-			Fragment result=ctx.statement_list().accept(this);
-			if(result==null) {
-				return template("pass");
-			} else {
-				return result;
-			}
+			return Optional.ofNullable(ctx.statement_list().accept(this)).orElse(template("pass"));
 		} else {
 			//option: FUNCTION function_declare eostmt statement_list
 			//statement_list contains inner code, function_declare has name and return list
@@ -687,7 +681,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 
 	@Override
 	public Fragment visitHold_statement(Hold_statementContext ctx) {
-		return template("comment").add("text", ctx.getText());
+		return template("comment").add("text", ctx.getText().trim());
 	}
 
 	@Override

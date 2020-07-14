@@ -12,10 +12,12 @@ public enum PythonDef {
 			"        return np_array.shape[dimen-1]\n"),//-1 to correct for different indexing
 	SURFC("def surfc(a, b, c):\n" + 
 			"    plt.figure().gca(projection=\"3d\").plot_surface(a, b, c)"),
+	PLOT("def plot(*args):\n" + 
+			"    plt.plot(*args)\n" + 
+			"    plt.draw()"),
 	FPLOT("def fplot(f, r):\n" + 
 			"    linspace = np.linspace(*r, 100)\n" + 
-			"    plt.plot(linspace, f(linspace))\n" + 
-			"    plt.show()");
+			"    plot(linspace, f(linspace))");
 	
 	private final String representation;
 	
