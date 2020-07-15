@@ -59,12 +59,15 @@ import sk.uniba.grman19.MatlabParser.Translation_unitContext;
 import sk.uniba.grman19.MatlabParser.Unary_expressionContext;
 import sk.uniba.grman19.MatlabParser.Unary_operatorContext;
 import sk.uniba.grman19.util.Fragment;
+import sk.uniba.grman19.util.LhsContextStack;
 
 public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	
-	//TODO write translator tests
+	//TODO write more translator tests
 	
 	private final STGroup templates;
+
+	private final LhsContextStack context=new LhsContextStack();
 	
 	private Fragment template(String name) {
 		return new Fragment(templates.getInstanceOf(name));
@@ -141,8 +144,8 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		if(ctx.array_list()!=null) {
 			//option '[' array_list ']'
 			//is this the lhs?
-			if(ctx.getParent() instanceof Postfix_expressionContext && ctx.getParent().getParent() instanceof Assignment_expressionContext) {
-				return ctx.array_list().accept(this);
+			if(context.isLhs()) {
+				return context.visitAsNonLhs(ctx.array_list(),this);
 			}
 			//return as a numpy array
 			return template("function_call")
@@ -194,6 +197,13 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	@Override
 	public Fragment visitArray_expression(Array_expressionContext ctx) {
 		//IDENTIFIER '(' index_expression_list ')'
+		//is this the lhs?
+		if(context.isLhs()) {
+			return template("index_call")
+					.add("name", ctx.IDENTIFIER().getText())
+					.add("arg_list", context.visitAsNonLhs(ctx.index_expression_list(),this));
+		}
+		
 		//used as a function call
 		String identifier = ctx.IDENTIFIER().getText();
 		
@@ -433,7 +443,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	@Override
 	public Fragment visitAssignment_expression(Assignment_expressionContext ctx) {
 		return template("assignment_expression")
-					.add("postfix_expression", ctx.postfix_expression().accept(this))
+					.add("postfix_expression", context.visitAsLhs(ctx.postfix_expression(),this))
 					.add("expression", ctx.expression().accept(this));
 	}
 

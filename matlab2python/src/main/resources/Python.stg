@@ -68,6 +68,10 @@ function_call(name,arg_list) ::=<<
 <name>(<arg_list>)
 >>
 
+index_call(name,arg_list) ::=<<
+<name>[<arg_list>]
+>>
+
 statement_list(statement_list,statement) ::=<<
 <statement_list>
 <statement>

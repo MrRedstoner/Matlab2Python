@@ -25,8 +25,6 @@ import sk.uniba.grman19.util.Fragment;
 import sk.uniba.grman19.util.TreeUtils;
 
 public class Runner {
-	//TODO:
-	//translate assignment lhs 'function calls' as indexing
 	private static boolean debug=false;
 	
 	private static Options getOptions() {

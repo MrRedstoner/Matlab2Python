@@ -199,4 +199,48 @@ public class TranslatorVisitorTest {
 		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY,PythonImport.PYPLOT);
 		check(input,output,defs,imports);
 	}
+	
+	@Test
+	public void testTuppleAssignment() {
+		String input=program(true,
+				"[X,Y]=source();");
+		String output=program(false,
+				"X, Y = source()");
+		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
+		check(input,output,defs,imports);
+	}
+	
+	@Test
+	public void testInCodeLists() {
+		String input=program(true,
+				"a=[1 2 3 4]");
+		String output=program(false,
+				"a = np.array([1, 2, 3, 4])");
+		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
+		check(input,output,defs,imports);
+	}
+	
+	@Test
+	public void testFunctionCalls() {
+		String input=program(true,
+				"value=call();");
+		String output=program(false,
+				"value = call()");
+		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
+		check(input,output,defs,imports);
+	}
+	
+	@Test
+	public void testLhsIndexing() {
+		String input=program(true,
+				"Z(1,2)=3");
+		String output=program(false,
+				"Z[1, 2] = 3");
+		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
+		check(input,output,defs,imports);
+	}
 }
