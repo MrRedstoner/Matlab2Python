@@ -243,4 +243,18 @@ public class TranslatorVisitorTest {
 		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
 		check(input,output,defs,imports);
 	}
+	
+	@Test
+	public void testClearClose() {
+		//assuming the interpreter is fresh anyway
+		String input=program(true,
+				"clc; clear all; close all",
+				"",
+				"a=5");
+		String output=program(false,
+				"a = 5");
+		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
+		check(input,output,defs,imports);
+	}
 }

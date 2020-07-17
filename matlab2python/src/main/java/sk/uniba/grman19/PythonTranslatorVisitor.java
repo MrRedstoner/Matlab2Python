@@ -29,6 +29,7 @@ import sk.uniba.grman19.MatlabParser.Array_listContext;
 import sk.uniba.grman19.MatlabParser.Assignment_expressionContext;
 import sk.uniba.grman19.MatlabParser.Assignment_statementContext;
 import sk.uniba.grman19.MatlabParser.Clear_statementContext;
+import sk.uniba.grman19.MatlabParser.Close_statementContext;
 import sk.uniba.grman19.MatlabParser.Elseif_clauseContext;
 import sk.uniba.grman19.MatlabParser.EostmtContext;
 import sk.uniba.grman19.MatlabParser.Equality_expressionContext;
@@ -455,6 +456,9 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 
 	@Override
 	public Fragment visitStatement(StatementContext ctx) {
+		if(ctx.clear_statement()!=null || ctx.close_statement()!=null) {
+			return null;
+		}
 		if(ctx.assignment_statement()!=null) {
 			//option assignment_statement
 			return ctx.assignment_statement().accept(this);
@@ -704,6 +708,12 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 
 	@Override
 	public Fragment visitExpend(ExpendContext ctx) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Fragment visitClose_statement(Close_statementContext ctx) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}

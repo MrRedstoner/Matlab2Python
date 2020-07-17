@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>sk.uniba.grman19</groupId>
 	<artifactId>matlab2python</artifactId>
-	<version>1.5.1</version>
+	<version>1.5.2</version>
 	<name>Matlab2Python</name>
 	<description>A simple translator</description>
 

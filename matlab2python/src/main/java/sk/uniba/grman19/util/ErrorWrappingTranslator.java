@@ -14,6 +14,7 @@ import sk.uniba.grman19.MatlabParser.Array_listContext;
 import sk.uniba.grman19.MatlabParser.Assignment_expressionContext;
 import sk.uniba.grman19.MatlabParser.Assignment_statementContext;
 import sk.uniba.grman19.MatlabParser.Clear_statementContext;
+import sk.uniba.grman19.MatlabParser.Close_statementContext;
 import sk.uniba.grman19.MatlabParser.Elseif_clauseContext;
 import sk.uniba.grman19.MatlabParser.EostmtContext;
 import sk.uniba.grman19.MatlabParser.Equality_expressionContext;
@@ -425,6 +426,15 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 	public Fragment visitExpend(ExpendContext ctx) {
 		try {
 			return super.visitExpend(ctx);
+		}catch(Exception e) {
+			return error(e);
+		}
+	}
+	
+	@Override
+	public Fragment visitClose_statement(Close_statementContext ctx) {
+		try {
+			return super.visitClose_statement(ctx);
 		}catch(Exception e) {
 			return error(e);
 		}

@@ -186,6 +186,7 @@ eostmt
 statement
    : global_statement
    | clear_statement
+   | close_statement
    | assignment_statement
    | expression_statement
    | selection_statement
@@ -211,6 +212,11 @@ global_statement
 
 clear_statement
    : CLEAR identifier_list eostmt
+   | CLC
+   ;
+
+close_statement
+   : CLOSE identifier_list eostmt
    ;
 
 expression_statement
@@ -360,6 +366,13 @@ CLEAR
    : 'clear'
    ;
 
+CLOSE
+   : 'close'
+   ;
+
+CLC
+   : 'clc'
+   ;
 
 ELSE
    : 'else'
