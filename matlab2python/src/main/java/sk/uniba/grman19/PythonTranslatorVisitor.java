@@ -13,7 +13,11 @@ import static sk.uniba.grman19.util.PythonImport.PYPLOT;
 import static sk.uniba.grman19.util.PythonImport.RANDOM;
 import static sk.uniba.grman19.util.PythonImport.SQRT;
 
+import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -60,7 +64,8 @@ import sk.uniba.grman19.MatlabParser.Translation_unitContext;
 import sk.uniba.grman19.MatlabParser.Unary_expressionContext;
 import sk.uniba.grman19.MatlabParser.Unary_operatorContext;
 import sk.uniba.grman19.util.Fragment;
-import sk.uniba.grman19.util.LhsContextStack;
+import sk.uniba.grman19.util.ContextStack.IndexingContextStack;
+import sk.uniba.grman19.util.ContextStack.LhsContextStack;
 
 public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	
@@ -68,7 +73,8 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	
 	private final STGroup templates;
 
-	private final LhsContextStack context=new LhsContextStack();
+	private final LhsContextStack lhsCont=new LhsContextStack();
+	private final IndexingContextStack indexCont=new IndexingContextStack();
 	
 	private Fragment template(String name) {
 		return new Fragment(templates.getInstanceOf(name));
@@ -145,8 +151,8 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		if(ctx.array_list()!=null) {
 			//option '[' array_list ']'
 			//is this the lhs?
-			if(context.isLhs()) {
-				return context.visitAsNonLhs(ctx.array_list(),this);
+			if(lhsCont.isLhs()) {
+				return lhsCont.visitAsNonLhs(ctx.array_list(),this).get();
 			}
 			//return as a numpy array
 			return template("function_call")
@@ -176,10 +182,16 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	public Fragment visitIndex_expression(Index_expressionContext ctx) {
 		if(ctx.expression()!=null) {
 			//option expression
-			return ctx.expression().accept(this);
+			if(indexCont.isIndexing()) {
+				//correct for difference in indexing
+				return template("minus_one").add("expression", indexCont.visitAsNonIndex(ctx.expression(),this).get());
+			} else {
+				return ctx.expression().accept(this);
+			}
 		}
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		//option ':'
+		//used for slicing, same in Python
+		return literal(":");
 	}
 
 	@Override
@@ -194,19 +206,34 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 						.add("element", ctx.index_expression().accept(this));
 		}
 	}
-
+	
+	private Set<String>knownFunctions=Collections.unmodifiableSet(Stream.of(
+			"fprintf", "func2str", "linspace", "meshgrid", "pause", "size",
+			"zeros", "sqrt", "title", "plot", "legend", "surfc",
+			"contour", "figure", "fplot", "rand", "abs"
+			).collect(Collectors.toSet()));
+	
 	@Override
 	public Fragment visitArray_expression(Array_expressionContext ctx) {
 		//IDENTIFIER '(' index_expression_list ')'
+		String identifier = ctx.IDENTIFIER().getText();
+		
 		//is this the lhs?
-		if(context.isLhs()) {
+		if(lhsCont.isLhs()) {
 			return template("index_call")
-					.add("name", ctx.IDENTIFIER().getText())
-					.add("arg_list", context.visitAsNonLhs(ctx.index_expression_list(),this));
+					.add("name", identifier)
+					.add("arg_list", lhsCont.visitAsNonLhs(indexCont.visitAsIndex(ctx.index_expression_list(),this)).get());
 		}
 		
-		//used as a function call
-		String identifier = ctx.IDENTIFIER().getText();
+		//is this the rhs with an unknown function?
+		if(!knownFunctions.contains(identifier)) {
+			//probably actual indexing then
+			return template("index_call")
+					.add("name", identifier)
+					.add("arg_list", indexCont.visitAsIndex(ctx.index_expression_list(),this).get());
+		}
+		
+		//otherwise used as a function call
 		
 		Fragment ret=template("function_call");
 		Fragment argList;
@@ -283,6 +310,10 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		case"abs":{
 			//available as-is
 		}break;
+		default:{
+			//should never happen is the knownFunctions set is correct
+			throw new RuntimeException("Default on function "+identifier);
+		}
 		}
 
 		return ret
@@ -437,17 +468,15 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			//used as range, + 1 because matlab uses inclusive ranges
 			return template("range")
 						.add("start", ctx.expression().accept(this))
-						.add("stop", template("binary_operator_expression")
-								.add("expression0", template("bracketed_expression").add("expression", ctx.or_expression().accept(this)))
-								.add("operator", "+")
-								.add("expression1", "1"));
+						.add("stop", template("plus_one")
+								.add("expression", ctx.or_expression().accept(this)));
 		}
 	}
 
 	@Override
 	public Fragment visitAssignment_expression(Assignment_expressionContext ctx) {
 		return template("assignment_expression")
-					.add("postfix_expression", context.visitAsLhs(ctx.postfix_expression(),this))
+					.add("postfix_expression", lhsCont.visitAsLhs(ctx.postfix_expression(),this).get())
 					.add("expression", ctx.expression().accept(this));
 	}
 

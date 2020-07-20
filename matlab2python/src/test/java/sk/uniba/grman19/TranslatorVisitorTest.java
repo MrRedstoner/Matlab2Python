@@ -238,7 +238,32 @@ public class TranslatorVisitorTest {
 		String input=program(true,
 				"Z(1,2)=3");
 		String output=program(false,
-				"Z[1, 2] = 3");
+				"Z[(1 - 1), (2 - 1)] = 3");
+		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
+		check(input,output,defs,imports);
+	}
+	
+	@Test
+	public void testRhsIndexing() {
+		//if the 'function' is not known, assumes indexing instead
+		String input=program(true,
+				"unknown=[1 2 3 4]",
+				"val=unknown(2)");
+		String output=program(false,
+				"unknown = np.array([1, 2, 3, 4])",
+				"val = unknown[(2 - 1)]");
+		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
+		check(input,output,defs,imports);
+	}
+	
+	@Test
+	public void testSlicing() {
+		String input=program(true,
+				"val=unknown(:,1)");
+		String output=program(false,
+				"val = unknown[:, (1 - 1)]");
 		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
 		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
 		check(input,output,defs,imports);
