@@ -280,6 +280,9 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			ret.addImport(RANDOM);
 			identifier="random.random";
 		}break;
+		case"abs":{
+			//available as-is
+		}break;
 		}
 
 		return ret

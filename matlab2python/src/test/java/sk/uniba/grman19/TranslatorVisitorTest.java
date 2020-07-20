@@ -168,11 +168,11 @@ public class TranslatorVisitorTest {
 	@Test
 	public void testIfFormFuncCall() {
 		String input=program(true,
-				"if a(b)>c",
+				"if abs(b)>c",
 				"	;",
 				"end");
 		String output=program(false,
-				"if a(b) > c:",
+				"if abs(b) > c:",
 				"    pass");
 		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
 		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
@@ -203,9 +203,9 @@ public class TranslatorVisitorTest {
 	@Test
 	public void testTuppleAssignment() {
 		String input=program(true,
-				"[X,Y]=source();");
+				"[X,Y]=abs();");
 		String output=program(false,
-				"X, Y = source()");
+				"X, Y = abs()");
 		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
 		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
 		check(input,output,defs,imports);
@@ -225,9 +225,9 @@ public class TranslatorVisitorTest {
 	@Test
 	public void testFunctionCalls() {
 		String input=program(true,
-				"value=call();");
+				"value=abs();");
 		String output=program(false,
-				"value = call()");
+				"value = abs()");
 		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
 		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
 		check(input,output,defs,imports);
