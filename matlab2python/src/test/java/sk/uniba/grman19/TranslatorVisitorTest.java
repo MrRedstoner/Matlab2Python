@@ -216,8 +216,8 @@ public class TranslatorVisitorTest {
 		String input=program(true,
 				"a=[1 2 3 4]");
 		String output=program(false,
-				"a = np.array([1, 2, 3, 4])");
-		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+				"a = array([1, 2, 3, 4])");
+		EnumSet<PythonDef> defs=EnumSet.of(PythonDef.ARRAY);
 		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
 		check(input,output,defs,imports);
 	}
@@ -251,9 +251,9 @@ public class TranslatorVisitorTest {
 				"unknown=[1 2 3 4]",
 				"val=unknown(2)");
 		String output=program(false,
-				"unknown = np.array([1, 2, 3, 4])",
+				"unknown = array([1, 2, 3, 4])",
 				"val = unknown[(2 - 1)]");
-		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+		EnumSet<PythonDef> defs=EnumSet.of(PythonDef.ARRAY);
 		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
 		check(input,output,defs,imports);
 	}
@@ -280,6 +280,32 @@ public class TranslatorVisitorTest {
 				"a = 5");
 		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
 		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
+		check(input,output,defs,imports);
+	}
+	
+	@Test
+	public void testDataLoad() {
+		String input=program(true,
+				"data = csvread('data2.csv');",
+				"u = [ones(size(data,1),1) data(:,2)];",
+				"v = data(:,1);");
+		String output=program(false,
+				"data = np.genfromtxt('data2.csv', delimiter=',')",
+				"u = array([np.ones(size(data, 1)), data[:, (2 - 1)]])",
+				"v = data[:, (1 - 1)]");
+		EnumSet<PythonDef> defs=EnumSet.of(PythonDef.ARRAY, PythonDef.SIZE);
+		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
+		check(input,output,defs,imports);
+	}
+	
+	@Test
+	public void testRegularOnes() {
+		String input=program(true,
+				"data=ones(2, 3, 4)");
+		String output=program(false,
+				"data = np.ones(2, 3, 4)");
+		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
 		check(input,output,defs,imports);
 	}
 }

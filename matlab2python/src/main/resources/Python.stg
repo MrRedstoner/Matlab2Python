@@ -2,7 +2,7 @@ fullTranslation(imports,defs,translation_unit) ::=<<
 <imports; separator="\n">
 
 
-<defs; separator="\n\n">
+<defs; separator="\n\n\n">
 
 
 <translation_unit>

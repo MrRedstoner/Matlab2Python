@@ -1,5 +1,7 @@
 package sk.uniba.grman19;
 
+import static java.util.function.Predicate.isEqual;
+import static sk.uniba.grman19.util.PythonDef.ARRAY;
 import static sk.uniba.grman19.util.PythonDef.FPLOT;
 import static sk.uniba.grman19.util.PythonDef.FUNC2STR;
 import static sk.uniba.grman19.util.PythonDef.PLOT;
@@ -63,9 +65,9 @@ import sk.uniba.grman19.MatlabParser.Statement_listContext;
 import sk.uniba.grman19.MatlabParser.Translation_unitContext;
 import sk.uniba.grman19.MatlabParser.Unary_expressionContext;
 import sk.uniba.grman19.MatlabParser.Unary_operatorContext;
-import sk.uniba.grman19.util.Fragment;
 import sk.uniba.grman19.util.ContextStack.IndexingContextStack;
 import sk.uniba.grman19.util.ContextStack.LhsContextStack;
+import sk.uniba.grman19.util.Fragment;
 
 public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	
@@ -157,7 +159,8 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			//return as a numpy array
 			return template("function_call")
 						.addImport(NUMPY)
-						.add("name", "np.array")
+						.addDef(ARRAY)
+						.add("name", "array")
 						.add("arg_list", template("square_bracketed_expression").add("expression", ctx.array_list().accept(this)));
 		}
 		// TODO Auto-generated method stub
@@ -210,7 +213,10 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	private Set<String>knownFunctions=Collections.unmodifiableSet(Stream.of(
 			"fprintf", "func2str", "linspace", "meshgrid", "pause", "size",
 			"zeros", "sqrt", "title", "plot", "legend", "surfc",
-			"contour", "figure", "fplot", "rand", "abs"
+			"contour", "figure", "fplot", "rand", "abs", "ones",
+			"csvread",
+			//names used for functions
+			"f", "df", "d2f"
 			).collect(Collectors.toSet()));
 	
 	@Override
@@ -310,6 +316,29 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		case"abs":{
 			//available as-is
 		}break;
+		case"ones":{
+			//skip last argument if it's a 1
+			if(Optional.of(ctx)
+				.map(Array_expressionContext::index_expression_list)
+				.map(Index_expression_listContext::index_expression)
+				.map(Index_expressionContext::getText)
+				.filter(isEqual("1"))
+				.isPresent()) {
+				argList=ctx.index_expression_list().index_expression_list().accept(this);
+			}
+			ret.addImport(NUMPY);
+			identifier="np.ones";
+		}break;
+		case"csvread":{
+			ret.addImport(NUMPY);
+			identifier="np.genfromtxt";
+			argList=template("comma_separated").add("list", argList).add("element", "delimiter=','");
+		}break;
+		//names used for functions
+		case"f":
+		case"df":
+		case"d2f":
+			break;
 		default:{
 			//should never happen is the knownFunctions set is correct
 			throw new RuntimeException("Default on function "+identifier);
