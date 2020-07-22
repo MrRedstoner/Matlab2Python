@@ -308,4 +308,20 @@ public class TranslatorVisitorTest {
 		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
 		check(input,output,defs,imports);
 	}
+	
+	@Test
+	public void testExpressions() {
+		String input=program(true,
+				"a=2;b=3;",
+				"c=(a+b)*5",
+				"d=a - (b^c)");
+		String output=program(false,
+				"a = 2",
+				"b = 3",
+				"c = (a + b) * 5",
+				"d = a - (b ** c)");
+		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
+		check(input,output,defs,imports);
+	}
 }

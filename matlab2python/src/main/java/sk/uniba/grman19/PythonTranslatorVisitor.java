@@ -71,6 +71,12 @@ import sk.uniba.grman19.util.Fragment;
 
 public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	
+	private static void doAssert(boolean condition) {
+		if(!condition) {
+			throw new RuntimeException("assertion failure");
+		}
+	}
+	
 	//TODO write more translator tests
 	
 	private final STGroup templates;
@@ -214,7 +220,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			"fprintf", "func2str", "linspace", "meshgrid", "pause", "size",
 			"zeros", "sqrt", "title", "plot", "legend", "surfc",
 			"contour", "figure", "fplot", "rand", "abs", "ones",
-			"csvread",
+			"csvread", "exp", "log", "norm", "sum",
 			//names used for functions
 			"f", "df", "d2f"
 			).collect(Collectors.toSet()));
@@ -275,7 +281,8 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		}break;
 		case"zeros":{
 			ret.addImport(NUMPY);
-			identifier="np.ma.zeros";
+			identifier="np.zeros";
+			argList=template("square_bracketed_expression").add("expression", argList);
 		}break;
 		case"sqrt":{
 			ret.addImport(SQRT);
@@ -309,7 +316,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		}break;
 		case"rand":{
 			//assuming no-arg variant
-			assert ctx.index_expression_list()==null;
+			doAssert(ctx.index_expression_list()==null);
 			ret.addImport(RANDOM);
 			identifier="random.random";
 		}break;
@@ -333,6 +340,24 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			ret.addImport(NUMPY);
 			identifier="np.genfromtxt";
 			argList=template("comma_separated").add("list", argList).add("element", "delimiter=','");
+		}break;
+		case"exp":{
+			ret.addImport(NUMPY);
+			identifier="np.exp";
+		}break;
+		case"log":{
+			ret.addImport(NUMPY);
+			identifier="np.log";
+		}break;
+		case"norm":{
+			ret.addImport(NUMPY);
+			identifier="np.linalg.norm";
+		}break;
+		case"sum":{
+			//assuming single-arg variant
+			doAssert(ctx.index_expression_list().index_expression_list()==null);
+			ret.addImport(NUMPY);
+			identifier="np.sum";
 		}break;
 		//names used for functions
 		case"f":
