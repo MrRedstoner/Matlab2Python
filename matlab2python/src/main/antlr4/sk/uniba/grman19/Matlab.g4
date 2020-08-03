@@ -230,12 +230,15 @@ assignment_statement
 
 array_element
    : expression
-   | expression_statement
+   ;
+
+array_sub_list
+   : array_element (',' array_element) *
+   | array_element +
    ;
 
 array_list
-   : array_element
-   | array_list array_element
+   : array_sub_list (';' array_sub_list) *
    ;
 
 selection_statement

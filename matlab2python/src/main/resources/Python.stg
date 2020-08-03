@@ -89,6 +89,10 @@ comma_separated(list,element) ::=<<
 <list>, <element>
 >>
 
+comma_separated_elems(element) ::=<<
+<element; separator=", ">
+>>
+
 comment(text) ::=<<
 # <text>
 >>

@@ -73,8 +73,7 @@ public class TranslatorVisitorTest {
 		//suffix by a newline
 		return Arrays.stream(lines).collect(Collectors.joining("\n","",endNewLine?"\n":""));
 	}
-
-	/**@return true for success*/
+	
 	private static String translate(ST template, CharStream input) {
 		MatlabParser parser;
 		MatlabLexer lexer=new MatlabLexer(input);
@@ -322,6 +321,17 @@ public class TranslatorVisitorTest {
 				"d = a - (b ** c)");
 		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
 		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
+		check(input,output,defs,imports);
+	}
+	
+	@Test
+	public void testNestedLists() {
+		String input=program(true,
+				"a=[1 2 3;4 5 6]");
+		String output=program(false,
+				"a = array([[1, 2, 3], [4, 5, 6]])");
+		EnumSet<PythonDef> defs=EnumSet.of(PythonDef.ARRAY);
+		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
 		check(input,output,defs,imports);
 	}
 }

@@ -11,6 +11,7 @@ import sk.uniba.grman19.MatlabParser.And_expressionContext;
 import sk.uniba.grman19.MatlabParser.Array_elementContext;
 import sk.uniba.grman19.MatlabParser.Array_expressionContext;
 import sk.uniba.grman19.MatlabParser.Array_listContext;
+import sk.uniba.grman19.MatlabParser.Array_sub_listContext;
 import sk.uniba.grman19.MatlabParser.Assignment_expressionContext;
 import sk.uniba.grman19.MatlabParser.Assignment_statementContext;
 import sk.uniba.grman19.MatlabParser.Clear_statementContext;
@@ -309,6 +310,15 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 	public Fragment visitArray_element(Array_elementContext ctx) {
 		try {
 			return super.visitArray_element(ctx);
+		}catch(Exception e) {
+			return error(e);
+		}
+	}
+	
+	@Override
+	public Fragment visitArray_sub_list(Array_sub_listContext ctx) {
+		try {
+			return super.visitArray_sub_list(ctx);
 		}catch(Exception e) {
 			return error(e);
 		}

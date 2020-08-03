@@ -16,6 +16,7 @@ import static sk.uniba.grman19.util.PythonImport.RANDOM;
 import static sk.uniba.grman19.util.PythonImport.SQRT;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,6 +33,7 @@ import sk.uniba.grman19.MatlabParser.And_expressionContext;
 import sk.uniba.grman19.MatlabParser.Array_elementContext;
 import sk.uniba.grman19.MatlabParser.Array_expressionContext;
 import sk.uniba.grman19.MatlabParser.Array_listContext;
+import sk.uniba.grman19.MatlabParser.Array_sub_listContext;
 import sk.uniba.grman19.MatlabParser.Assignment_expressionContext;
 import sk.uniba.grman19.MatlabParser.Assignment_statementContext;
 import sk.uniba.grman19.MatlabParser.Clear_statementContext;
@@ -637,29 +639,38 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 
 	@Override
 	public Fragment visitArray_element(Array_elementContext ctx) {
-		if(ctx.expression()==null) {
-			//option expression_statement
-			return ctx.expression_statement().accept(this);
-		} else {
-			//option expression
-			return ctx.expression().accept(this);
-		}
+		//expression
+		return ctx.expression().accept(this);
 	}
 
 	@Override
+	public Fragment visitArray_sub_list(Array_sub_listContext ctx) {
+		//option array_element (',' array_element) *
+		//option array_element +
+		//separator is irrelevant
+		Fragment result=template("comma_separated_elems");
+		ctx.array_element()
+			.stream()
+			.map(this::visit)
+			.filter(Objects::nonNull)
+			.forEach(elem->result.add("element", elem));
+		return result;
+	}
+	
+	@Override
 	public Fragment visitArray_list(Array_listContext ctx) {
-		if(ctx.array_list()==null) {
-			//option array_element
-			return ctx.array_element().accept(this);
+		//array_sub_list (';' array_sub_list) *
+		if(ctx.array_sub_list().size()==1) {
+			//actually array_sub_list
+			return ctx.array_sub_list(0).accept(this);
 		} else {
-			//option array_list array_element
-			Fragment element=ctx.array_element().accept(this);
-			if(element==null) {
-				return ctx.array_list().accept(this);
-			}
-			return template("comma_separated")
-						.add("list", ctx.array_list().accept(this))
-						.add("element", element);
+			//actually array_sub_list (';' array_sub_list) +
+			Fragment result=template("comma_separated_elems");
+			ctx.array_sub_list()
+				.stream()
+				.map(this::visit)
+				.forEach(elem->result.add("element", template("square_bracketed_expression").add("expression",elem)));
+			return result;
 		}
 	}
 
