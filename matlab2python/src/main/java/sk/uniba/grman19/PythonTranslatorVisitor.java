@@ -424,14 +424,25 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			//option multiplicative_expression ARRAYPOW unary_expression
 			String operator=null;
 			switch(ctx.getChild(1).getText()) {
-			case "*":operator="*";break;
 			case "/":operator="/";break;
 			case "^":operator="**";break;
 			
 			//numpy arrays make it map over the array automatically
-			case ".*":operator="*";break;
 			case "./":operator="/";break;
 			case ".^":operator="**";break;
+			//elementwise multiplication
+			case ".*":operator="*";break;
+			
+			//matrix multiplication (if matrices)
+			case "*":{
+				//to get matrix multiplication for matrixes and scalar for scalars
+				return template("function_call")
+							.addImport(NUMPY)
+							.add("name", "np.dot")
+							.add("arg_list", template("comma_separated_elems")
+									.add("element", ctx.multiplicative_expression().accept(this))
+									.add("element", ctx.unary_expression().accept(this)));
+			}
 			
 			default:{
 				throw new UnsupportedOperationException();
