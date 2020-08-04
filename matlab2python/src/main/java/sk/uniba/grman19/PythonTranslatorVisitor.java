@@ -445,6 +445,16 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 									.add("element", ctx.unary_expression().accept(this)));
 			}
 			
+			//matlab mldivide
+			case "\\":{
+				return template("function_call")
+							.addImport(NUMPY)
+							.add("name", "np.linalg.lstsq")
+							.add("arg_list", template("comma_separated_elems")
+									.add("element", ctx.multiplicative_expression().accept(this))
+									.add("element", ctx.unary_expression().accept(this)));
+			}
+			
 			default:{
 				throw new UnsupportedOperationException();
 			}

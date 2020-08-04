@@ -340,6 +340,17 @@ public class TranslatorVisitorTest {
 	}
 	
 	@Test
+	public void testMldivide() {
+		String input=program(true,
+				"a=x\\y");
+		String output=program(false,
+				"a = np.linalg.lstsq(x, y)");
+		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
+		check(input,output,defs,imports);
+	}
+	
+	@Test
 	public void testNestedLists() {
 		String input=program(true,
 				"a=[1 2 3;4 5 6]");
