@@ -4,6 +4,8 @@ public enum PythonDef {
 	FUNC2STR("def func2str(f):\n"
 			+ "    return inspect.getsource(f)"),
 	PRINTF("def printf(format_str, *args):\n" + 
+			"    args = tuple(itertools.chain.from_iterable(\n" + 
+			"        arg if isinstance(arg, np.ndarray) else [arg] for arg in args))\n" + 
 			"    print(format_str % args, end='')"),
 	SIZE("def size(np_array, dimen=None):\n" + 
 			"    if dimen is None:\n" +

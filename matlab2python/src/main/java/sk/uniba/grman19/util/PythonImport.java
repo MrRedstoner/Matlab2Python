@@ -6,6 +6,7 @@ public enum PythonImport {
 	INSPECT("import inspect"),
 	SQRT("from math import sqrt"),
 	RANDOM("import random"),
+	ITERTOOLS("import itertools"),
 	AXES3D("from mpl_toolkits.mplot3d import Axes3D");
 
 	private final String representation;

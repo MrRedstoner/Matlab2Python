@@ -10,6 +10,7 @@ import static sk.uniba.grman19.util.PythonDef.SIZE;
 import static sk.uniba.grman19.util.PythonDef.SURFC;
 import static sk.uniba.grman19.util.PythonImport.AXES3D;
 import static sk.uniba.grman19.util.PythonImport.INSPECT;
+import static sk.uniba.grman19.util.PythonImport.ITERTOOLS;
 import static sk.uniba.grman19.util.PythonImport.NUMPY;
 import static sk.uniba.grman19.util.PythonImport.PYPLOT;
 import static sk.uniba.grman19.util.PythonImport.RANDOM;
@@ -260,7 +261,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		//add imports and defs as needed
 		switch(identifier) {
 		case"fprintf":{
-			ret.addDef(PRINTF);
+			ret.addImport(ITERTOOLS).addDef(PRINTF);
 			identifier="printf";
 		}break;
 		case"func2str":{
