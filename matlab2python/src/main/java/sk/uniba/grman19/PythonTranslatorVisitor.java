@@ -666,6 +666,13 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			//noop command
 			return null;
 		} else {
+			String text=ctx.getText().trim();
+			switch(text) {
+			//ignore tic-toc for now, TODO implement it
+			case"tic":
+			case"toc":
+				return template("comment").add("text", text);
+			}
 			//option expression eostmt
 			return ctx.expression().accept(this);
 		}

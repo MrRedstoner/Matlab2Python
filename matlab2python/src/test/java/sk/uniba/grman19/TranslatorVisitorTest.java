@@ -392,4 +392,19 @@ public class TranslatorVisitorTest {
 		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
 		check(input,output,defs,imports);
 	}
+	
+	@Test
+	public void eliminateTicToc() { //TODO implement tic-toc fully
+		String input=program(true,
+				"tic",
+				"a=5",
+				"toc");
+		String output=program(false,
+				"# tic",
+				"a = 5",
+				"# toc");
+		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
+		check(input,output,defs,imports);
+	}
 }
