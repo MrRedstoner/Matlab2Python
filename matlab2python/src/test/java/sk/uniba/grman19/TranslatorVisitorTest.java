@@ -22,6 +22,7 @@ import org.stringtemplate.v4.STGroupFile;
 import sk.uniba.grman19.util.Fragment;
 import sk.uniba.grman19.util.PythonDef;
 import sk.uniba.grman19.util.PythonImport;
+import sk.uniba.grman19.util.TreeUtils;
 
 public class TranslatorVisitorTest {
 	private static PythonTranslatorVisitor ptv;
@@ -74,12 +75,15 @@ public class TranslatorVisitorTest {
 		return Arrays.stream(lines).collect(Collectors.joining("\n","",endNewLine?"\n":""));
 	}
 	
-	private static String translate(ST template, CharStream input) {
+	private static String translate(ST template, CharStream input, boolean dump) {
 		MatlabParser parser;
 		MatlabLexer lexer=new MatlabLexer(input);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		parser = new MatlabParser(tokens);
 		ParseTree tree = parser.translation_unit();
+		
+		if(dump)TreeUtils.dump(parser, tree);
+		dump=false;
 
 		Fragment result=ptv.visit(tree);
 
@@ -89,8 +93,12 @@ public class TranslatorVisitorTest {
 	}
 	
 	private static void check(String input, String output, EnumSet<PythonDef> defs, EnumSet<PythonImport> imports) {
+		check(input,output,defs,imports,false);
+	}
+	
+	private static void check(String input, String output, EnumSet<PythonDef> defs, EnumSet<PythonImport> imports, boolean dump) {
 		TestST st=new TestST();
-		String translation=translate(st,CharStreams.fromString(input));
+		String translation=translate(st,CharStreams.fromString(input), dump);
 		assertEquals(output,translation);
 		assertEquals(defs,st.defs);
 		assertEquals(imports,st.imports);
@@ -367,6 +375,19 @@ public class TranslatorVisitorTest {
 				"a=[1 2 3;4 5 6]");
 		String output=program(false,
 				"a = array([[1, 2, 3], [4, 5, 6]])");
+		EnumSet<PythonDef> defs=EnumSet.of(PythonDef.ARRAY);
+		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
+		check(input,output,defs,imports);
+	}
+	
+	@Test
+	public void testListsOfIndexed() {
+		String input=program(true,
+				"x=[0 1 2]",
+				"y=[X(1) X(3)]");
+		String output=program(false,
+				"x = array([0, 1, 2])",
+				"y = array([X[(1 - 1)], X[(3 - 1)]])");
 		EnumSet<PythonDef> defs=EnumSet.of(PythonDef.ARRAY);
 		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
 		check(input,output,defs,imports);

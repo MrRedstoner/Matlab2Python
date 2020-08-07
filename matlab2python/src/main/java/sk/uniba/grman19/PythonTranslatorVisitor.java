@@ -679,8 +679,13 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 
 	@Override
 	public Fragment visitArray_element(Array_elementContext ctx) {
-		//expression
-		return ctx.expression().accept(this);
+		if(ctx.array_expression()==null) {
+			//option expression
+			return ctx.expression().accept(this);
+		} else {
+			//option array_expression
+			return ctx.array_expression().accept(this);
+		}
 	}
 
 	@Override

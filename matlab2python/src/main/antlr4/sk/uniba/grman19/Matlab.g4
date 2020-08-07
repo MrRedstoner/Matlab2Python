@@ -233,7 +233,8 @@ assignment_statement
    ;
 
 array_element
-   : expression
+   : array_expression
+   | expression
    ;
 
 array_sub_list
