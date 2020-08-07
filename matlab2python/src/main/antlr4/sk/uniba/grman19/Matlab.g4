@@ -121,16 +121,20 @@ unary_operator
    | '~'
    ;
 
-multiplicative_expression
+array_mul_expression
    : unary_expression
-   | multiplicative_expression '*' unary_expression
-   | multiplicative_expression '/' unary_expression
-   | multiplicative_expression '\\' unary_expression
-   | multiplicative_expression '^' unary_expression
-   | multiplicative_expression ARRAYMUL unary_expression
-   | multiplicative_expression ARRAYDIV unary_expression
-   | multiplicative_expression ARRAYRDIV unary_expression
-   | multiplicative_expression ARRAYPOW unary_expression
+   | array_mul_expression ARRAYMUL unary_expression
+   | array_mul_expression ARRAYDIV unary_expression
+   | array_mul_expression ARRAYRDIV unary_expression
+   | array_mul_expression ARRAYPOW unary_expression
+   ;
+
+multiplicative_expression
+   : array_mul_expression
+   | multiplicative_expression '*' array_mul_expression
+   | multiplicative_expression '/' array_mul_expression
+   | multiplicative_expression '\\' array_mul_expression
+   | multiplicative_expression '^' array_mul_expression
    ;
 
 additive_expression

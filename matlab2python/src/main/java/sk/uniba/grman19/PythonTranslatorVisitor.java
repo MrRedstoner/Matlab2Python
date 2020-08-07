@@ -8,6 +8,7 @@ import static sk.uniba.grman19.util.PythonDef.PLOT;
 import static sk.uniba.grman19.util.PythonDef.PRINTF;
 import static sk.uniba.grman19.util.PythonDef.SIZE;
 import static sk.uniba.grman19.util.PythonDef.SURFC;
+import static sk.uniba.grman19.util.PythonDef.ZEROS;
 import static sk.uniba.grman19.util.PythonImport.AXES3D;
 import static sk.uniba.grman19.util.PythonImport.INSPECT;
 import static sk.uniba.grman19.util.PythonImport.ITERTOOLS;
@@ -57,6 +58,7 @@ import sk.uniba.grman19.MatlabParser.Index_expression_listContext;
 import sk.uniba.grman19.MatlabParser.Iteration_statementContext;
 import sk.uniba.grman19.MatlabParser.Jump_statementContext;
 import sk.uniba.grman19.MatlabParser.Lambda_definitionContext;
+import sk.uniba.grman19.MatlabParser.Array_mul_expressionContext;
 import sk.uniba.grman19.MatlabParser.Multiplicative_expressionContext;
 import sk.uniba.grman19.MatlabParser.Or_expressionContext;
 import sk.uniba.grman19.MatlabParser.Postfix_expressionContext;
@@ -283,9 +285,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			ret.addDef(SIZE);
 		}break;
 		case"zeros":{
-			ret.addImport(NUMPY);
-			identifier="np.zeros";
-			argList=template("square_bracketed_expression").add("expression", argList);
+			ret.addImport(NUMPY).addDef(ZEROS);
 		}break;
 		case"sqrt":{
 			ret.addImport(SQRT);
@@ -408,31 +408,49 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
-
+	
 	@Override
-	public Fragment visitMultiplicative_expression(Multiplicative_expressionContext ctx) {
-		if(ctx.multiplicative_expression()==null) {
+	public Fragment visitArray_mul_expression(Array_mul_expressionContext ctx) {
+		if(ctx.array_mul_expression()==null) {
 			//option unary_expression
 			return ctx.unary_expression().accept(this);
 		} else {
-			//option multiplicative_expression '*' unary_expression
-			//option multiplicative_expression '/' unary_expression
-			//option multiplicative_expression '\\' unary_expression
-			//option multiplicative_expression '^' unary_expression
-			//option multiplicative_expression ARRAYMUL unary_expression
-			//option multiplicative_expression ARRAYDIV unary_expression
-			//option multiplicative_expression ARRAYRDIV unary_expression
-			//option multiplicative_expression ARRAYPOW unary_expression
+			//option array_mul_expression ARRAYMUL unary_expression
+			//option array_mul_expression ARRAYDIV unary_expression
+			//option array_mul_expression ARRAYRDIV unary_expression
+			//option array_mul_expression ARRAYPOW unary_expression
 			String operator=null;
 			switch(ctx.getChild(1).getText()) {
-			case "/":operator="/";break;
-			case "^":operator="**";break;
-			
 			//numpy arrays make it map over the array automatically
 			case "./":operator="/";break;
 			case ".^":operator="**";break;
 			//elementwise multiplication
 			case ".*":operator="*";break;
+			default:{
+				throw new UnsupportedOperationException();
+			}
+			}
+			return template("binary_operator_expression")
+					.add("expression0", ctx.array_mul_expression().accept(this))
+					.add("operator", operator)
+					.add("expression1", ctx.unary_expression().accept(this));
+		}
+	}
+
+	@Override
+	public Fragment visitMultiplicative_expression(Multiplicative_expressionContext ctx) {
+		if(ctx.multiplicative_expression()==null) {
+			//option array_mul_expression
+			return ctx.array_mul_expression().accept(this);
+		} else {
+			//option multiplicative_expression '*' array_mul_expression
+			//option multiplicative_expression '/' array_mul_expression
+			//option multiplicative_expression '\\' array_mul_expression
+			//option multiplicative_expression '^' array_mul_expression
+			String operator=null;
+			switch(ctx.getChild(1).getText()) {
+			case "/":operator="/";break;
+			case "^":operator="**";break;
 			
 			//matrix multiplication (if matrices)
 			case "*":{
@@ -442,7 +460,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 							.add("name", "np.dot")
 							.add("arg_list", template("comma_separated_elems")
 									.add("element", ctx.multiplicative_expression().accept(this))
-									.add("element", ctx.unary_expression().accept(this)));
+									.add("element", ctx.array_mul_expression().accept(this)));
 			}
 			
 			//matlab mldivide
@@ -452,7 +470,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 							.add("name", "np.linalg.lstsq")
 							.add("arg_list", template("comma_separated_elems")
 									.add("element", ctx.multiplicative_expression().accept(this))
-									.add("element", ctx.unary_expression().accept(this)));
+									.add("element", ctx.array_mul_expression().accept(this)));
 			}
 			
 			default:{
@@ -462,7 +480,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			return template("binary_operator_expression")
 					.add("expression0", ctx.multiplicative_expression().accept(this))
 					.add("operator", operator)
-					.add("expression1", ctx.unary_expression().accept(this));
+					.add("expression1", ctx.array_mul_expression().accept(this));
 		}
 	}
 
