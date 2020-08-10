@@ -205,7 +205,8 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		}
 		//option ':'
 		//used for slicing, same in Python
-		return literal(":");
+		//pad with np.newaxis to not loose a dimension
+		return literal(":, np.newaxis").addImport(NUMPY);
 	}
 
 	@Override
@@ -465,12 +466,15 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			
 			//matlab mldivide
 			case "\\":{
-				return template("function_call")
-							.addImport(NUMPY)
-							.add("name", "np.linalg.lstsq")
-							.add("arg_list", template("comma_separated_elems")
-									.add("element", ctx.multiplicative_expression().accept(this))
-									.add("element", ctx.array_mul_expression().accept(this)));
+				return template("index_call")
+							.add("arg_list", "0")
+							.add("name", template("function_call")
+									.addImport(NUMPY)
+									.add("name", "np.linalg.lstsq")
+									.add("arg_list", template("comma_separated_elems")
+											.add("element", ctx.multiplicative_expression().accept(this))
+											.add("element", ctx.array_mul_expression().accept(this))
+											.add("element", "rcond=None")));
 			}
 			
 			default:{

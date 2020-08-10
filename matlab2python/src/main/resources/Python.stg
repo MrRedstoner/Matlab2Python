@@ -69,7 +69,7 @@ lambda <args>: <expression>
 >>
 
 range(start,stop) ::=<<
-range(<start>,<stop>)
+range(<start>, <stop>)
 >>
 
 function_call(name,arg_list) ::=<<

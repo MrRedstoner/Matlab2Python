@@ -270,9 +270,9 @@ public class TranslatorVisitorTest {
 		String input=program(true,
 				"val=unknown(:,1)");
 		String output=program(false,
-				"val = unknown[:, (1 - 1)]");
+				"val = unknown[:, np.newaxis, (1 - 1)]");
 		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
-		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
+		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
 		check(input,output,defs,imports);
 	}
 	
@@ -298,8 +298,8 @@ public class TranslatorVisitorTest {
 				"v = data(:,1);");
 		String output=program(false,
 				"data = np.genfromtxt('data2.csv', delimiter=',')",
-				"u = array([np.ones(size(data, 1)), data[:, (2 - 1)]])",
-				"v = data[:, (1 - 1)]");
+				"u = array([np.ones(size(data, 1)), data[:, np.newaxis, (2 - 1)]])",
+				"v = data[:, np.newaxis, (1 - 1)]");
 		EnumSet<PythonDef> defs=EnumSet.of(PythonDef.ARRAY, PythonDef.SIZE);
 		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
 		check(input,output,defs,imports);
@@ -363,7 +363,7 @@ public class TranslatorVisitorTest {
 		String input=program(true,
 				"a=x\\y");
 		String output=program(false,
-				"a = np.linalg.lstsq(x, y)");
+				"a = np.linalg.lstsq(x, y, rcond=None)[0]");//numpy returns a tuple of things, [0] being the solution
 		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
 		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
 		check(input,output,defs,imports);
