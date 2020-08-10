@@ -15,8 +15,7 @@ public enum PythonImport {
 		representation=value;
 	}
 	
-	@Override
-	public String toString() {
+	public String getRepresentation() {
 		return representation;
 	}
 }

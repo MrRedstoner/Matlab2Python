@@ -38,8 +38,8 @@ public class TranslatorVisitorTest {
 		private static final Map<String,PythonImport>importMap;
 
 		static {
-			defMap=Collections.unmodifiableMap(Arrays.stream(PythonDef.values()).collect(Collectors.toMap(def->def.toString(), def->def)));
-			importMap=Collections.unmodifiableMap(Arrays.stream(PythonImport.values()).collect(Collectors.toMap(def->def.toString(), def->def)));
+			defMap=Collections.unmodifiableMap(Arrays.stream(PythonDef.values()).collect(Collectors.toMap(def->def.getRepresentation(), def->def)));
+			importMap=Collections.unmodifiableMap(Arrays.stream(PythonImport.values()).collect(Collectors.toMap(imp->imp.getRepresentation(), imp->imp)));
 		}
 
 		private final EnumSet<PythonDef>defs;

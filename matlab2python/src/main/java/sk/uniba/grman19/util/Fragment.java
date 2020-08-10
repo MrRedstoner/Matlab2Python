@@ -62,11 +62,11 @@ public class Fragment {
 	
 	public String getFullTranslation(ST fullTranslation) {
 		for(PythonImport pimport:imports) {
-			fullTranslation.add("imports", pimport.toString());
+			fullTranslation.add("imports", pimport.getRepresentation());
 		}
 		
 		for(PythonDef pdef:defs) {
-			fullTranslation.add("defs", pdef.toString());
+			fullTranslation.add("defs", pdef.getRepresentation());
 		}
 		
 		fullTranslation.add("translation_unit", template);
