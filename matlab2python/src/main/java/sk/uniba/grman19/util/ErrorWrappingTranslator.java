@@ -1,5 +1,8 @@
 package sk.uniba.grman19.util;
 
+import java.util.Optional;
+import java.util.Set;
+
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
@@ -58,9 +61,20 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 	private Fragment error(Exception e) {
 		return error(e.getClass().getName());
 	}
-
+	
+	/**
+	 * @param templates used as a source of template instances
+	 * */
 	public ErrorWrappingTranslator(STGroup templates) {
-		super(templates);
+		this(templates,Optional.empty());
+	}
+	
+	/**
+	 * @param templates used as a source of template instances
+	 * @param indexIgnore if non-empty, anything not contained when indexing will be reported
+	 * */
+	public ErrorWrappingTranslator(STGroup templates, Optional<Set<String>>indexIgnore) {
+		super(templates,indexIgnore);
 		this.templates=templates;
 	}
 

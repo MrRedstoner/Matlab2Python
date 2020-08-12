@@ -85,6 +85,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	//TODO write more translator tests
 	
 	private final STGroup templates;
+	private final Optional<Set<String>> ignore;
 
 	private final LhsContextStack lhsCont=new LhsContextStack();
 	private final IndexingContextStack indexCont=new IndexingContextStack();
@@ -116,8 +117,20 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 				.add("text", text);
 	}
 	
-	protected PythonTranslatorVisitor(STGroup templates){
+	/**
+	 * @param templates used as a source of template instances
+	 * */
+	public PythonTranslatorVisitor(STGroup templates){
+		this(templates,Optional.empty());
+	}
+	
+	/**
+	 * @param templates used as a source of template instances
+	 * @param indexIgnore if non-empty, anything not contained when indexing will be reported
+	 * */
+	public PythonTranslatorVisitor(STGroup templates, Optional<Set<String>>indexIgnore){
 		this.templates=templates;
+		this.ignore=indexIgnore;
 	}
 
 	@Override
@@ -127,19 +140,16 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 
 	@Override
 	public Fragment visitChildren(RuleNode node) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Fragment visitTerminal(TerminalNode node) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Fragment visitErrorNode(ErrorNode node) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
 
@@ -246,6 +256,11 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		//is this the rhs with an unknown function?
 		if(!knownFunctions.contains(identifier)) {
 			//probably actual indexing then
+			final String ident=identifier;
+			ignore.ifPresent(set->{
+				if(!set.contains(ident))System.out.println("Indexing on "+ident+" text: "+ctx.getText());
+			});
+			
 			return template("index_call")
 					.add("name", identifier)
 					.add("arg_list", indexCont.visitAsIndex(ctx.index_expression_list(),this).get());
@@ -582,7 +597,6 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 
 	@Override
 	public Fragment visitEostmt(EostmtContext ctx) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
 
@@ -861,7 +875,6 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 
 	@Override
 	public Fragment visitExpend(ExpendContext ctx) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
 

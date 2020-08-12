@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -35,19 +38,13 @@ public class Runner {
 			.addOption("l", "logfile", true, "Redirect stderr")
 			.addOption("v", "verbose", false, "More verbose output")
 			.addOption("d", "debug", false, "Most verbose output, implies -v")
+			.addOption("x", "indexlist", true, "Comma separated, if set print when indexing on non-contained value")
 			.addOption("h", "help", false, "Print help");
 		return options;
 	}
 	
 	/**@return true for success*/
-	private static boolean translate(STGroup templates, CharStream input, PrintStream out) {
-		PythonTranslatorVisitor ptv;
-		if(debug) {
-			ptv=new PythonTranslatorVisitor(templates);
-		} else {
-			ptv=new ErrorWrappingTranslator(templates);
-		}
-		
+	private static boolean translate(PythonTranslatorVisitor ptv, STGroup templates, CharStream input, PrintStream out) {
 		MatlabParser parser;
 		try {
 			MatlabLexer lexer=new MatlabLexer(input);
@@ -99,6 +96,18 @@ public class Runner {
 			}
 		}
 		
+		Optional<Set<String>>ignoreList=Optional.empty();
+		if(cmd.hasOption("indexlist")) {
+			ignoreList=Optional.of(new HashSet<String>(Arrays.asList(cmd.getOptionValue("indexlist").split(","))));
+		}
+		
+		PythonTranslatorVisitor ptv;
+		if(debug) {
+			ptv=new PythonTranslatorVisitor(templates,ignoreList);
+		} else {
+			ptv=new ErrorWrappingTranslator(templates,ignoreList);
+		}
+		
 		if("-".equals(fromFile)) {
 			//read from stdin, output to stdout or -o if given
 			if(toFile==null) {
@@ -106,7 +115,7 @@ public class Runner {
 				try {
 					if(verbose)System.out.println("Translating stdin to stdout");
 					
-					boolean fine=translate(templates,CharStreams.fromStream(System.in),System.out);
+					boolean fine=translate(ptv,templates,CharStreams.fromStream(System.in),System.out);
 					
 					if(!fine) {
 						if(verbose)System.out.println("There was an error");
@@ -126,7 +135,7 @@ public class Runner {
 				try {
 					if(verbose)System.out.println("Translating stdin to "+outFile.getAbsolutePath());
 					
-					boolean fine=translate(templates,CharStreams.fromStream(System.in),new PrintStream(outFile));
+					boolean fine=translate(ptv,templates,CharStreams.fromStream(System.in),new PrintStream(outFile));
 					
 					if(!fine) {
 						if(verbose)System.out.println("There was an error");
@@ -165,7 +174,7 @@ public class Runner {
 					try {
 						if(verbose)System.out.println("Translating "+matlab.getAbsolutePath()+" to "+python.getAbsolutePath());
 						
-						boolean fileFine=translate(templates,CharStreams.fromPath(matlab.toPath()),new PrintStream(python));
+						boolean fileFine=translate(ptv,templates,CharStreams.fromPath(matlab.toPath()),new PrintStream(python));
 						
 						if(!fileFine) {
 							if(verbose)System.out.println("There was an error");
@@ -198,7 +207,7 @@ public class Runner {
 				try {
 					if(verbose)System.out.println("Translating "+inFile.getAbsolutePath()+" to "+outFile.getAbsolutePath());
 					
-					boolean fine=translate(templates,CharStreams.fromPath(inFile.toPath()),new PrintStream(outFile));
+					boolean fine=translate(ptv,templates,CharStreams.fromPath(inFile.toPath()),new PrintStream(outFile));
 					
 					if(!fine) {
 						if(verbose)System.out.println("There was an error");
