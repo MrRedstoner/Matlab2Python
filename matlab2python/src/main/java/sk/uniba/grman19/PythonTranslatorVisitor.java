@@ -236,7 +236,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			"fprintf", "func2str", "linspace", "meshgrid", "pause", "size",
 			"zeros", "sqrt", "title", "plot", "legend", "surfc",
 			"contour", "figure", "fplot", "rand", "abs", "ones",
-			"csvread", "exp", "log", "norm", "sum",
+			"csvread", "exp", "log", "norm", "sum", "ezplot",
 			//names used for functions
 			"f", "df", "d2f"
 			).collect(Collectors.toSet()));
@@ -330,6 +330,9 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			ret.addImport(PYPLOT);
 			identifier="plt.figure";
 		}break;
+		case"ezplot":{
+			identifier="fplot";
+		}//used the same way, fallthrough
 		case"fplot":{
 			ret.addImport(NUMPY).addImport(PYPLOT).addDef(PLOT).addDef(FPLOT);
 		}break;
@@ -377,6 +380,9 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			doAssert(ctx.index_expression_list().index_expression_list()==null);
 			ret.addImport(NUMPY);
 			identifier="np.sum";
+			argList=template("comma_separated_elems")
+						.add("element", argList)
+						.add("element", "axis=0");
 		}break;
 		//names used for functions
 		case"f":

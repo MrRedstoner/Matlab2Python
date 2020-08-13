@@ -370,6 +370,17 @@ public class TranslatorVisitorTest {
 	}
 	
 	@Test
+	public void testSum() {
+		String input=program(true,
+				"a=sum(x+y+5)");
+		String output=program(false,
+				"a = np.sum(x + y + 5, axis=0)");
+		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
+		check(input,output,defs,imports);
+	}
+	
+	@Test
 	public void testNestedLists() {
 		String input=program(true,
 				"a=[1 2 3;4 5 6]");
