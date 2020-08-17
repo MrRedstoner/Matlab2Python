@@ -25,6 +25,12 @@ public enum PythonDef {
 			"        return np.zeros(*args)\n" + 
 			"    else:\n" + 
 			"        return np.zeros(args)"),
+	M_SUM("def m_sum(np_array):\n" + 
+			"    try:\n" + 
+			"        axis = next(filter(lambda e: e[1] != 1, enumerate(np_array.shape)))[0]\n" + 
+			"        return np.sum(np_array, axis=axis, keepdims=True)\n" + 
+			"    except StopIteration:\n" + 
+			"        return np_array"),//all dimensions are 1, just return
 	ARRAY("def array(arg):\n" + 
 			"    if isinstance(arg[0], np.ndarray):\n" + 
 			"        return np.column_stack(arg)\n" + 

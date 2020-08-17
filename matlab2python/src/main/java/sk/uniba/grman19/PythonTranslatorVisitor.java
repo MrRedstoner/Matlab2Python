@@ -4,6 +4,7 @@ import static java.util.function.Predicate.isEqual;
 import static sk.uniba.grman19.util.PythonDef.ARRAY;
 import static sk.uniba.grman19.util.PythonDef.FPLOT;
 import static sk.uniba.grman19.util.PythonDef.FUNC2STR;
+import static sk.uniba.grman19.util.PythonDef.M_SUM;
 import static sk.uniba.grman19.util.PythonDef.PLOT;
 import static sk.uniba.grman19.util.PythonDef.PRINTF;
 import static sk.uniba.grman19.util.PythonDef.SIZE;
@@ -35,6 +36,7 @@ import sk.uniba.grman19.MatlabParser.And_expressionContext;
 import sk.uniba.grman19.MatlabParser.Array_elementContext;
 import sk.uniba.grman19.MatlabParser.Array_expressionContext;
 import sk.uniba.grman19.MatlabParser.Array_listContext;
+import sk.uniba.grman19.MatlabParser.Array_mul_expressionContext;
 import sk.uniba.grman19.MatlabParser.Array_sub_listContext;
 import sk.uniba.grman19.MatlabParser.Assignment_expressionContext;
 import sk.uniba.grman19.MatlabParser.Assignment_statementContext;
@@ -58,7 +60,6 @@ import sk.uniba.grman19.MatlabParser.Index_expression_listContext;
 import sk.uniba.grman19.MatlabParser.Iteration_statementContext;
 import sk.uniba.grman19.MatlabParser.Jump_statementContext;
 import sk.uniba.grman19.MatlabParser.Lambda_definitionContext;
-import sk.uniba.grman19.MatlabParser.Array_mul_expressionContext;
 import sk.uniba.grman19.MatlabParser.Multiplicative_expressionContext;
 import sk.uniba.grman19.MatlabParser.Or_expressionContext;
 import sk.uniba.grman19.MatlabParser.Postfix_expressionContext;
@@ -378,11 +379,8 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		case"sum":{
 			//assuming single-arg variant
 			doAssert(ctx.index_expression_list().index_expression_list()==null);
-			ret.addImport(NUMPY);
-			identifier="np.sum";
-			argList=template("comma_separated_elems")
-						.add("element", argList)
-						.add("element", "axis=0");
+			ret.addDef(M_SUM);
+			identifier="m_sum";
 		}break;
 		//names used for functions
 		case"f":

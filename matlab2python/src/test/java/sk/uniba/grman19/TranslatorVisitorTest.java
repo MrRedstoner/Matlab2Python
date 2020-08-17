@@ -374,9 +374,9 @@ public class TranslatorVisitorTest {
 		String input=program(true,
 				"a=sum(x+y+5)");
 		String output=program(false,
-				"a = np.sum(x + y + 5, axis=0)");
-		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
-		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
+				"a = m_sum(x + y + 5)");
+		EnumSet<PythonDef> defs=EnumSet.of(PythonDef.M_SUM);
+		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
 		check(input,output,defs,imports);
 	}
 	
