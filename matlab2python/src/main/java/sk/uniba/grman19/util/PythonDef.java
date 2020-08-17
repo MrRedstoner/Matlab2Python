@@ -17,9 +17,14 @@ public enum PythonDef {
 	PLOT("def plot(*args):\n" + 
 			"    plt.plot(*args)\n" + 
 			"    plt.draw()"),
+	//fplot calls f with shape (len,1)
 	FPLOT("def fplot(f, r):\n" + 
-			"    linspace = np.linspace(*r, 100)\n" + 
-			"    plot(linspace, f(linspace))"),
+			"    ls = np.linspace(*r, 100)[...,np.newaxis]\n" + 
+			"    plot(ls, f(ls))"),
+	//ezplot calls f with shape (1,len)
+	EZPLOT("def ezplot(f, r):\n" + 
+			"    ls = np.linspace(*r, 100)\n" + 
+			"    plot(ls, f(ls[np.newaxis,...])[0,...])"),
 	ZEROS("def zeros(*args):\n" + 
 			"    if len(args) == 1:\n" + //already a tuple
 			"        return np.zeros(*args)\n" + 

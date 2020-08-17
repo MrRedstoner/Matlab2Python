@@ -2,6 +2,7 @@ package sk.uniba.grman19;
 
 import static java.util.function.Predicate.isEqual;
 import static sk.uniba.grman19.util.PythonDef.ARRAY;
+import static sk.uniba.grman19.util.PythonDef.EZPLOT;
 import static sk.uniba.grman19.util.PythonDef.FPLOT;
 import static sk.uniba.grman19.util.PythonDef.FUNC2STR;
 import static sk.uniba.grman19.util.PythonDef.M_SUM;
@@ -332,8 +333,8 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			identifier="plt.figure";
 		}break;
 		case"ezplot":{
-			identifier="fplot";
-		}//used the same way, fallthrough
+			ret.addImport(NUMPY).addImport(PYPLOT).addDef(PLOT).addDef(EZPLOT);
+		}break;
 		case"fplot":{
 			ret.addImport(NUMPY).addImport(PYPLOT).addDef(PLOT).addDef(FPLOT);
 		}break;
