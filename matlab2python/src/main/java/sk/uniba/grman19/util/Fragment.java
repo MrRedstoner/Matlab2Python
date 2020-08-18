@@ -1,6 +1,7 @@
 package sk.uniba.grman19.util;
 
 import java.util.EnumSet;
+import static java.util.Objects.requireNonNull;
 
 import org.stringtemplate.v4.ST;
 
@@ -35,6 +36,7 @@ public class Fragment {
 	
 	/**@return this to allow chaining*/
 	public Fragment add(String key, Fragment value) {
+		value=requireNonNull(value);
 		template.add(key, value.template);
 		imports.addAll(value.imports);
 		defs.addAll(value.defs);
@@ -44,6 +46,7 @@ public class Fragment {
 	
 	/**@return this to allow chaining*/
 	public Fragment add(String key, String value) {
+		value=requireNonNull(value);
 		template.add(key, value);
 		return this;
 	}
