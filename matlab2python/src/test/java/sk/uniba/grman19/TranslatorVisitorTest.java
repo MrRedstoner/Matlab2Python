@@ -333,6 +333,19 @@ public class TranslatorVisitorTest {
 	}
 	
 	@Test
+	public void testComparisons() {
+		String input=program(true,
+				"a==b",
+				"c~=b");
+		String output=program(false,
+				"a == b",
+				"c != b");
+		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
+		check(input,output,defs,imports);
+	}
+	
+	@Test
 	public void testMultiplications() {
 		String input=program(true,
 				"a=2*3",

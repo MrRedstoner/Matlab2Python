@@ -545,9 +545,19 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		if(ctx.equality_expression()==null) {
 			//option relational_expression
 			return ctx.relational_expression().accept(this);
+		}else {
+			//option equality_expression EQ_OP relational_expression
+			//option equality_expression NE_OP relational_expression
+			String operator=null;
+			switch(ctx.getChild(1).getText()) {
+			case"==":operator="==";break;
+			case"~=":operator="!=";break;
+			}
+			return template("binary_operator_expression")
+					.add("expression0", ctx.equality_expression().accept(this))
+					.add("operator", operator)
+					.add("expression1", ctx.relational_expression().accept(this));
 		}
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
 	}
 
 	@Override
