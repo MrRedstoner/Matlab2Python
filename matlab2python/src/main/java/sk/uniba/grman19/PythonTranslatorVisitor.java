@@ -239,6 +239,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			"zeros", "sqrt", "title", "plot", "legend", "surfc",
 			"contour", "figure", "fplot", "rand", "abs", "ones",
 			"csvread", "exp", "log", "norm", "sum", "ezplot",
+			"mod",
 			//names used for functions
 			"f", "df", "d2f"
 			).collect(Collectors.toSet()));
@@ -382,6 +383,10 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			doAssert(ctx.index_expression_list().index_expression_list()==null);
 			ret.addDef(M_SUM);
 			identifier="m_sum";
+		}break;
+		case"mod":{
+			ret.addImport(NUMPY);
+			identifier="np.mod";//could also use the % operator
 		}break;
 		//names used for functions
 		case"f":
