@@ -431,4 +431,19 @@ public class TranslatorVisitorTest {
 		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
 		check(input,output,defs,imports);
 	}
+	
+	@Test
+	public void renameReservedWords() {
+		String input=program(true,
+				"a=5",
+				"del=6",
+				"del(1)");
+		String output=program(false,
+				"a = 5",
+				"del_ = 6",
+				"del_[(1 - 1)]");
+		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
+		check(input,output,defs,imports);
+	}
 }

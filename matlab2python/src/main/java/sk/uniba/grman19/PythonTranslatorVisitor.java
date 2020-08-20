@@ -20,9 +20,11 @@ import static sk.uniba.grman19.util.PythonImport.RANDOM;
 import static sk.uniba.grman19.util.PythonImport.SQRT;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -84,6 +86,21 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		}
 	}
 	
+	private static final Function<String,String>keywordTranform;
+	
+	static {
+		Map<String,String> kt=Stream.of(
+				//keywords.kwlist in a cpython 3.6 interpreter
+				//some are probably not applicable (being keywords in Matlab as well)
+				"False", "None", "True", "and", "as", "assert",
+				"break", "class", "continue", "def", "del", "elif",
+				"else", "except", "finally", "for", "from", "global",
+				"if", "import", "in", "is", "lambda", "nonlocal",
+				"not", "or", "pass", "raise", "return", "try",
+				"while", "with", "yield"
+		).collect(Collectors.toMap(s->s, s->s+"_"));
+		keywordTranform=in->kt.getOrDefault(in,in);
+	}
 	//TODO write more translator tests
 	
 	private final STGroup templates;
@@ -98,6 +115,10 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	
 	private Fragment literal(String value) {
 		return template("literal").add("text", value);
+	}
+	
+	private Fragment identifier(String text) {
+		return literal(keywordTranform.apply(text));
 	}
 	
 	private String pythonString(String text) {
@@ -159,7 +180,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	public Fragment visitPrimary_expression(Primary_expressionContext ctx) {
 		if(ctx.IDENTIFIER()!=null) {
 			//option IDENTIFIER
-			return literal(ctx.getText());
+			return identifier(ctx.getText());
 		}
 		if(ctx.CONSTANT()!=null) {
 			//option CONSTANT
@@ -252,7 +273,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		//is this the lhs?
 		if(lhsCont.isLhs()) {
 			return template("index_call")
-					.add("name", identifier)
+					.add("name", identifier(identifier))
 					.add("arg_list", lhsCont.visitAsNonLhs(indexCont.visitAsIndex(ctx.index_expression_list(),this)).get());
 		}
 		
@@ -265,7 +286,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			});
 			
 			return template("index_call")
-					.add("name", identifier)
+					.add("name", identifier(identifier))
 					.add("arg_list", indexCont.visitAsIndex(ctx.index_expression_list(),this).get());
 		}
 		
@@ -800,7 +821,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			//option FOR IDENTIFIER '=' expression statement_list END eostmt
 			//option FOR '(' IDENTIFIER '=' expression ')' statement_list END eostmt
 			return template("foreach")
-						.add("variable", literal(ctx.IDENTIFIER().getText()))
+						.add("variable", identifier(ctx.IDENTIFIER().getText()))
 						.add("iterable", ctx.expression().accept(this))
 						.add("statement_list", Optional.ofNullable(ctx.statement_list().accept(this)).orElse(template("pass")));
 		} else {
@@ -840,12 +861,12 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	public Fragment visitFunc_ident_list(Func_ident_listContext ctx) {
 		if(ctx.func_ident_list()==null) {
 			//option IDENTIFIER
-			return literal(ctx.IDENTIFIER().getText());
+			return identifier(ctx.IDENTIFIER().getText());
 		} else {
 			//option func_ident_list ',' IDENTIFIER
 			return template("comma_separated")
 					.add("list", ctx.func_ident_list().accept(this))
-					.add("element", literal(ctx.IDENTIFIER().getText()));
+					.add("element", identifier(ctx.IDENTIFIER().getText()));
 		}
 	}
 
@@ -853,7 +874,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	public Fragment visitFunc_return_list(Func_return_listContext ctx) {
 		if(ctx.IDENTIFIER()!=null) {
 			//option IDENTIFIER
-			return literal(ctx.IDENTIFIER().getText());
+			return identifier(ctx.IDENTIFIER().getText());
 		} else {
 			//option '[' func_ident_list ']'
 			return ctx.func_ident_list().accept(this);
@@ -866,7 +887,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		// IDENTIFIER '(' ')'
 		// IDENTIFIER '(' func_ident_list ')'
 		return template("function_def")
-					.add("name", literal(ctx.IDENTIFIER().getText()))
+					.add("name", identifier(ctx.IDENTIFIER().getText()))
 					.add("args", Optional.ofNullable(ctx.func_ident_list()).map(fil->fil.accept(this)).orElse(template("empty")));
 	}
 
