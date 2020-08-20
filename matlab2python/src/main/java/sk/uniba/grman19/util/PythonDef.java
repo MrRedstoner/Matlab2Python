@@ -12,7 +12,7 @@ public enum PythonDef {
 			"        return np_array.shape\n" +
 			"    else:\n" +
 			"        return np_array.shape[dimen-1]"),//-1 to correct for different indexing
-	SURFC("def surfc(a, b, c):\n" + 
+	SURFC("def surfc(a, b, c, *args):\n" + //TODO handle more args properly
 			"    plt.figure().gca(projection=\"3d\").plot_surface(a, b, c)"),
 	PLOT("def plot(*args):\n" + 
 			"    plt.plot(*args)\n" + 
