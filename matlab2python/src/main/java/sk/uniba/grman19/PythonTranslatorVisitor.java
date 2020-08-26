@@ -470,11 +470,13 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			//option array_mul_expression ARRAYDIV unary_expression
 			//option array_mul_expression ARRAYRDIV unary_expression
 			//option array_mul_expression ARRAYPOW unary_expression
+			//option array_mul_expression '^' unary_expression
 			String operator=null;
 			switch(ctx.getChild(1).getText()) {
 			//numpy arrays make it map over the array automatically
 			case "./":operator="/";break;
 			case ".^":operator="**";break;
+			case "^":operator="**";break;
 			//elementwise multiplication
 			case ".*":operator="*";break;
 			default:{
@@ -497,11 +499,9 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			//option multiplicative_expression '*' array_mul_expression
 			//option multiplicative_expression '/' array_mul_expression
 			//option multiplicative_expression '\\' array_mul_expression
-			//option multiplicative_expression '^' array_mul_expression
 			String operator=null;
 			switch(ctx.getChild(1).getText()) {
 			case "/":operator="/";break;
-			case "^":operator="**";break;
 			
 			//matrix multiplication (if matrices)
 			case "*":{

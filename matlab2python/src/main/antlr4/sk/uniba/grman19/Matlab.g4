@@ -127,6 +127,7 @@ array_mul_expression
    | array_mul_expression ARRAYDIV unary_expression
    | array_mul_expression ARRAYRDIV unary_expression
    | array_mul_expression ARRAYPOW unary_expression
+   | array_mul_expression '^' unary_expression
    ;
 
 multiplicative_expression
@@ -134,7 +135,6 @@ multiplicative_expression
    | multiplicative_expression '*' array_mul_expression
    | multiplicative_expression '/' array_mul_expression
    | multiplicative_expression '\\' array_mul_expression
-   | multiplicative_expression '^' array_mul_expression
    ;
 
 additive_expression

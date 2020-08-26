@@ -372,6 +372,17 @@ public class TranslatorVisitorTest {
 	}
 	
 	@Test
+	public void testMultiplicationsPriority2() {
+		String input=program(true,
+				"a=4*x^2");
+		String output=program(false,
+				"a = np.dot(4, x ** 2)");
+		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
+		check(input,output,defs,imports);
+	}
+	
+	@Test
 	public void testMldivide() {
 		String input=program(true,
 				"a=x\\y");
