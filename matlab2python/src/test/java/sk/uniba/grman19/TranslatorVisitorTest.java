@@ -457,4 +457,27 @@ public class TranslatorVisitorTest {
 		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
 		check(input,output,defs,imports);
 	}
+	
+	@Test
+	public void translateSwitch() {
+		String input=program(true,
+				"switch variable",
+				"case 'ab'",
+				"	a=1",
+				"case 'abc'",
+				"	a=10",
+				"otherwise",
+				"	a=100",
+				"end");
+		String output=program(false,
+				"if variable == 'ab':",
+				"    a = 1",
+				"elif variable == 'abc':",
+				"    a = 10",
+				"else:",
+				"    a = 100");
+		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
+		check(input,output,defs,imports);
+	}
 }

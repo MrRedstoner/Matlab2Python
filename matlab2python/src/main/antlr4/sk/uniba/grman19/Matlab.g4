@@ -8,6 +8,7 @@ added support for:
  - no argument function calls
  - line continuation
  - ' operator including multiple on a line
+ - switch statement
 */
 /*
 BSD License
@@ -198,6 +199,7 @@ statement
    | jump_statement
    | COMMENT_STATEMENT
    | hold_statement
+   | switch_statement
    ;
 
 statement_list
@@ -252,6 +254,18 @@ selection_statement
    | IF expression expend statement_list ELSE statement_list END eostmt
    | IF expression expend statement_list elseif_clause END eostmt
    | IF expression expend statement_list elseif_clause ELSE statement_list END eostmt
+   ;
+
+switch_statement
+   : SWITCH IDENTIFIER expend switch_case+ otherwise_case? END eostmt
+   ;
+
+switch_case
+   : CASE STRING_LITERAL statement_list
+   ;
+
+otherwise_case
+   : OTHERWISE statement_list
    ;
 
 expend
@@ -391,6 +405,17 @@ ELSEIF
    : 'elseif'
    ;
 
+SWITCH
+   : 'switch'
+   ;
+
+CASE
+   : 'case'
+   ;
+
+OTHERWISE
+   : 'otherwise'
+   ;
 
 LE_OP
    : '<='

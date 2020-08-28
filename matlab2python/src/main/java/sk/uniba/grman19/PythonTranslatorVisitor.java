@@ -65,12 +65,15 @@ import sk.uniba.grman19.MatlabParser.Jump_statementContext;
 import sk.uniba.grman19.MatlabParser.Lambda_definitionContext;
 import sk.uniba.grman19.MatlabParser.Multiplicative_expressionContext;
 import sk.uniba.grman19.MatlabParser.Or_expressionContext;
+import sk.uniba.grman19.MatlabParser.Otherwise_caseContext;
 import sk.uniba.grman19.MatlabParser.Postfix_expressionContext;
 import sk.uniba.grman19.MatlabParser.Primary_expressionContext;
 import sk.uniba.grman19.MatlabParser.Relational_expressionContext;
 import sk.uniba.grman19.MatlabParser.Selection_statementContext;
 import sk.uniba.grman19.MatlabParser.StatementContext;
 import sk.uniba.grman19.MatlabParser.Statement_listContext;
+import sk.uniba.grman19.MatlabParser.Switch_caseContext;
+import sk.uniba.grman19.MatlabParser.Switch_statementContext;
 import sk.uniba.grman19.MatlabParser.Translation_unitContext;
 import sk.uniba.grman19.MatlabParser.Unary_expressionContext;
 import sk.uniba.grman19.MatlabParser.Unary_operatorContext;
@@ -126,7 +129,6 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		//make sure not to clobber the outer '
 		return "'"+text.substring(1, text.length()-1).replace("''", "\\'")+"'";
 	}
-	
 
 	private Fragment comment(String text) {
 		//at minimum contains the starting % and ending \n
@@ -650,37 +652,12 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		if(ctx.clear_statement()!=null || ctx.close_statement()!=null) {
 			return null;
 		}
-		if(ctx.assignment_statement()!=null) {
-			//option assignment_statement
-			return ctx.assignment_statement().accept(this);
-		}
-		if(ctx.expression_statement()!=null) {
-			//option expression_statement
-			return ctx.expression_statement().accept(this);
-		}
-		if(ctx.selection_statement()!=null) {
-			//option selection_statement
-			return ctx.selection_statement().accept(this);
-		}
-		if(ctx.iteration_statement()!=null) {
-			//option iteration_statement
-			return ctx.iteration_statement().accept(this);
-		}
-		if(ctx.jump_statement()!=null) {
-			//option jump_statement
-			return ctx.jump_statement().accept(this);
-		}
 		if(ctx.COMMENT_STATEMENT()!=null) {
 			//option COMMENT_STATEMENT
 			return comment(ctx.COMMENT_STATEMENT().getText());
 		}
-		if(ctx.hold_statement()!=null) {
-			//option hold_statement
-			return ctx.hold_statement().accept(this);
-		}
 		
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		return ctx.getChild(0).accept(this);
 	}
 
 	@Override
@@ -927,5 +904,39 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	public Fragment visitClose_statement(Close_statementContext ctx) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Fragment visitSwitch_statement(Switch_statementContext ctx) {
+		Fragment var=identifier(ctx.IDENTIFIER().getText());
+		Fragment out=template("multi_statement_list");
+		for(int i=0;i<ctx.switch_case().size();i++) {
+			Fragment caseVal=literal(pythonString(ctx.switch_case(i).STRING_LITERAL().getText()));
+			
+			Fragment theCase=ctx.switch_case(i).accept(this)
+				.add("condition", template("binary_operator_expression")
+					.add("expression0", var)
+					.add("operator", "==")
+					.add("expression1", caseVal));
+			theCase.add("el", i==0?"":"el");
+			
+			out.add("statement", theCase);
+		}
+		if(ctx.otherwise_case()!=null) {
+			out.add("statement", ctx.otherwise_case().accept(this));
+		}
+		return out;
+	}
+
+	@Override
+	public Fragment visitSwitch_case(Switch_caseContext ctx) {
+		return template("maybeelif")
+					.add("statement_list", ctx.statement_list().accept(this));
+	}
+
+	@Override
+	public Fragment visitOtherwise_case(Otherwise_caseContext ctx) {
+		return template("pureelse")
+					.add("statement_list", ctx.statement_list().accept(this));
 	}
 }

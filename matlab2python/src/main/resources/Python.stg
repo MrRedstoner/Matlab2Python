@@ -47,6 +47,16 @@ if <condition>:
     <statement_list>
 >>
 
+maybeelif(el, condition, statement_list) ::=<<
+<el>if <condition>:
+    <statement_list>
+>>
+
+pureelse(statement_list) ::=<<
+else:
+    <statement_list>
+>>
+
 ifelse(condition, statement_list0,statement_list1) ::=<<
 if <condition>:
     <statement_list0>
@@ -83,6 +93,10 @@ index_call(name,arg_list) ::=<<
 statement_list(statement_list,statement) ::=<<
 <statement_list>
 <statement>
+>>
+
+multi_statement_list(statement) ::=<<
+<statement; separator="\n">
 >>
 
 comma_separated(list,element) ::=<<
