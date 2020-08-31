@@ -480,4 +480,44 @@ public class TranslatorVisitorTest {
 		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
 		check(input,output,defs,imports);
 	}
+
+	@Test
+	public void testWhileFormDirect() {
+		String input=program(true,
+				"while a>b",
+				"	;",
+				"end");
+		String output=program(false,
+				"while a > b:",
+				"    pass");
+		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
+		check(input,output,defs,imports);
+	}
+	
+	@Test
+	public void testWhileWithoutNewline() {
+		String input=program(true,
+				"while a>b break;end");
+		String output=program(false,
+				"while a > b:",
+				"    break");
+		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
+		check(input,output,defs,imports);
+	}
+	
+	@Test
+	public void testWhileFormFuncCall() {
+		String input=program(true,
+				"while abs(b)>c",
+				"	;",
+				"end");
+		String output=program(false,
+				"while abs(b) > c:",
+				"    pass");
+		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
+		check(input,output,defs,imports);
+	}
 }

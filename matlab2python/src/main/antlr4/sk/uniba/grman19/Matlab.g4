@@ -279,7 +279,8 @@ elseif_clause
    ;
 
 iteration_statement
-   : WHILE expression statement_list END eostmt
+   : WHILE expression expend statement_list END eostmt
+   | WHILE expression statement_list END eostmt
    | FOR IDENTIFIER '=' expression statement_list END eostmt
    | FOR '(' IDENTIFIER '=' expression ')' statement_list END eostmt
    ;
