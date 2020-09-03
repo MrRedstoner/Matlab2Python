@@ -17,7 +17,6 @@ import static sk.uniba.grman19.util.PythonImport.ITERTOOLS;
 import static sk.uniba.grman19.util.PythonImport.NUMPY;
 import static sk.uniba.grman19.util.PythonImport.PYPLOT;
 import static sk.uniba.grman19.util.PythonImport.RANDOM;
-import static sk.uniba.grman19.util.PythonImport.SQRT;
 
 import java.util.Collections;
 import java.util.Map;
@@ -330,7 +329,8 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			ret.addImport(NUMPY).addDef(ZEROS);
 		}break;
 		case"sqrt":{
-			ret.addImport(SQRT);
+			ret.addImport(NUMPY);
+			identifier="np.sqrt";
 		}break;
 		case"title":{
 			ret.addImport(PYPLOT);
