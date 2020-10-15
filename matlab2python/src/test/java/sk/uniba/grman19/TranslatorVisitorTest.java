@@ -68,6 +68,11 @@ public class TranslatorVisitorTest {
 			//returns this
 			return super.add(name, value);
 		}
+		
+		@Override
+		public String render() {
+			return super.render().replace("\r", "");
+		}
 	}
 
 	private static String program(boolean endNewLine,String...lines) {
