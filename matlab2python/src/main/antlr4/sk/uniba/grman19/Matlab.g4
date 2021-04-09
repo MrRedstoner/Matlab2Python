@@ -79,6 +79,14 @@ private boolean isStringPossible() {
 }
 }
 
+@parser::members {
+private boolean aWhitespace(){
+	TokenStream ts=getTokenStream();
+	int type=ts.get(ts.index()-1).getType();
+	return (type==WS)||(type==LINE_CONTINUATION);
+}
+}
+
 primary_expression
    : IDENTIFIER
    | CONSTANT
@@ -89,8 +97,8 @@ primary_expression
    ;
 
 postfix_expression
-   : primary_expression
-   | array_expression
+   : array_expression
+   | primary_expression
    | postfix_expression TRANSPOSE
    | postfix_expression NCTRANSPOSE
    ;
@@ -235,13 +243,12 @@ assignment_statement
    ;
 
 array_element
-   : array_expression
-   | expression
+   : expression
    ;
 
 array_sub_list
    : array_element (',' array_element) *
-   | array_element +
+   | array_element ({aWhitespace()}? array_element) *
    ;
 
 array_list
@@ -485,9 +492,9 @@ CR
 
 
 LINE_CONTINUATION
-: '...\n' -> skip
+: '...\n' -> channel(HIDDEN)
 ;
 
 WS
-   : [ \t] + -> skip
+   : [ \t] + -> channel(HIDDEN)
    ;

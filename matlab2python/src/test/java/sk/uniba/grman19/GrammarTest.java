@@ -13,6 +13,7 @@ public class GrammarTest {
 		String content=
 				"a=[0...\n" +
 				"1];\n" +
+				"[f(0) 1]\n"+
 				"for i = 1:10\n" +
 				"a = a+i;\n" +
 				"end\n" +
