@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.CharStream;
@@ -20,17 +21,19 @@ import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import sk.uniba.grman19.util.Fragment;
+import sk.uniba.grman19.util.IdentifierTypeStorage;
 import sk.uniba.grman19.util.PythonDef;
 import sk.uniba.grman19.util.PythonImport;
 import sk.uniba.grman19.util.TreeUtils;
 
 public class TranslatorVisitorTest {
-	private static PythonTranslatorVisitor ptv;
+	private static STGroup templates;
+	private static PTVFactory ptvFactory;
 
 	@BeforeAll
 	public static void createVisitor() {
-		STGroup templates = new STGroupFile("Python.stg");
-		ptv=new PythonTranslatorVisitor(templates);
+		templates = new STGroupFile("Python.stg");
+		ptvFactory=new PTVFactory(true, templates, Optional.empty(),new IdentifierTypeStorage());
 	}
 
 	private static class TestST extends ST{
@@ -80,7 +83,7 @@ public class TranslatorVisitorTest {
 		return Arrays.stream(lines).collect(Collectors.joining("\n","",endNewLine?"\n":""));
 	}
 	
-	private static String translate(ST template, CharStream input, boolean dump) {
+	private static String translate(ST template, CharStream input, boolean dump, PythonTranslatorVisitor ptv) {
 		MatlabParser parser;
 		MatlabLexer lexer=new MatlabLexer(input);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -100,10 +103,14 @@ public class TranslatorVisitorTest {
 	private static void check(String input, String output, EnumSet<PythonDef> defs, EnumSet<PythonImport> imports) {
 		check(input,output,defs,imports,false);
 	}
-	
+
 	private static void check(String input, String output, EnumSet<PythonDef> defs, EnumSet<PythonImport> imports, boolean dump) {
+		check(input,output,defs,imports,ptvFactory.getNew(),dump);
+	}
+	
+	private static void check(String input, String output, EnumSet<PythonDef> defs, EnumSet<PythonImport> imports, PythonTranslatorVisitor ptv, boolean dump) {
 		TestST st=new TestST();
-		String translation=translate(st,CharStreams.fromString(input), dump);
+		String translation=translate(st,CharStreams.fromString(input), dump, ptv);
 		assertEquals(output,translation);
 		assertEquals(defs,st.defs);
 		assertEquals(imports,st.imports);
@@ -267,6 +274,19 @@ public class TranslatorVisitorTest {
 				"val = unknown[(2 - 1)]");
 		EnumSet<PythonDef> defs=EnumSet.of(PythonDef.ARRAY);
 		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
+		check(input,output,defs,imports);
+	}
+	
+	@Test
+	public void testFunctionNamePickup() {
+		String input=program(true,
+				"fun=@(x)x",
+				"fun(5)");
+		String output=program(false,
+				"fun = lambda x: x",
+				"fun(5)");
+		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
 		check(input,output,defs,imports);
 	}
 	

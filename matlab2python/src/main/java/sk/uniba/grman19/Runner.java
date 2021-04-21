@@ -24,6 +24,7 @@ import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import sk.uniba.grman19.util.Fragment;
+import sk.uniba.grman19.util.IdentifierTypeStorage;
 import sk.uniba.grman19.util.TreeUtils;
 
 public class Runner {
@@ -100,7 +101,7 @@ public class Runner {
 			ignoreList=Optional.of(new HashSet<String>(Arrays.asList(cmd.getOptionValue("indexlist").split(","))));
 		}
 		
-		PTVFactory ptv=new PTVFactory(debug, templates, ignoreList);
+		PTVFactory ptv=new PTVFactory(debug, templates, ignoreList, new IdentifierTypeStorage());
 		
 		if("-".equals(fromFile)) {
 			//read from stdin, output to stdout or -o if given

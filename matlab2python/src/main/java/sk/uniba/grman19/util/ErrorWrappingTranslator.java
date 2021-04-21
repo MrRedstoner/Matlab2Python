@@ -66,15 +66,16 @@ public class ErrorWrappingTranslator extends PythonTranslatorVisitor {
 	 * @param templates used as a source of template instances
 	 * */
 	public ErrorWrappingTranslator(STGroup templates) {
-		this(templates,Optional.empty());
+		this(templates,Optional.empty(), new IdentifierTypeStorage());
 	}
 	
 	/**
 	 * @param templates used as a source of template instances
 	 * @param indexIgnore if non-empty, anything not contained when indexing will be reported
+	 * @param identType 
 	 * */
-	public ErrorWrappingTranslator(STGroup templates, Optional<Set<String>>indexIgnore) {
-		super(templates,indexIgnore);
+	public ErrorWrappingTranslator(STGroup templates, Optional<Set<String>>indexIgnore, IdentifierTypeStorage identType) {
+		super(templates,indexIgnore, identType);
 		this.templates=templates;
 	}
 

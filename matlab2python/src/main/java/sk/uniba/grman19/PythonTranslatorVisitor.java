@@ -79,6 +79,8 @@ import sk.uniba.grman19.MatlabParser.Unary_operatorContext;
 import sk.uniba.grman19.util.ContextStack.IndexingContextStack;
 import sk.uniba.grman19.util.ContextStack.LhsContextStack;
 import sk.uniba.grman19.util.Fragment;
+import sk.uniba.grman19.util.IdentifierType;
+import sk.uniba.grman19.util.IdentifierTypeStorage;
 
 public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	
@@ -110,6 +112,8 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 
 	private final LhsContextStack lhsCont=new LhsContextStack();
 	private final IndexingContextStack indexCont=new IndexingContextStack();
+	
+	private final IdentifierTypeStorage identType;
 	
 	private Fragment template(String name) {
 		return new Fragment(templates.getInstanceOf(name));
@@ -145,16 +149,17 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	 * @param templates used as a source of template instances
 	 * */
 	public PythonTranslatorVisitor(STGroup templates){
-		this(templates,Optional.empty());
+		this(templates,Optional.empty(),new IdentifierTypeStorage());
 	}
 	
 	/**
 	 * @param templates used as a source of template instances
 	 * @param indexIgnore if non-empty, anything not contained when indexing will be reported
 	 * */
-	public PythonTranslatorVisitor(STGroup templates, Optional<Set<String>>indexIgnore){
+	public PythonTranslatorVisitor(STGroup templates, Optional<Set<String>>indexIgnore, IdentifierTypeStorage identType){
 		this.templates=templates;
 		this.ignore=indexIgnore;
+		this.identType=identType;
 	}
 
 	@Override
@@ -261,13 +266,11 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			"zeros", "sqrt", "title", "plot", "legend", "surfc",
 			"contour", "figure", "fplot", "rand", "abs", "ones",
 			"csvread", "exp", "log", "norm", "sum", "ezplot",
-			"mod", "eye",
-			//names used for functions
-			"f", "df", "d2f"
+			"mod", "eye"
 			).collect(Collectors.toSet()));
 	
 	@Override
-	public Fragment visitArray_expression(Array_expressionContext ctx) {
+	public Fragment visitArray_expression(Array_expressionContext ctx) {//TODO here
 		//IDENTIFIER '(' index_expression_list ')'
 		String identifier = ctx.IDENTIFIER().getText();
 		
@@ -280,15 +283,32 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		
 		//is this the rhs with an unknown function?
 		if(!knownFunctions.contains(identifier)) {
-			//probably actual indexing then
+			//check what we know
 			final String ident=identifier;
-			ignore.ifPresent(set->{
-				if(!set.contains(ident))System.out.println("Indexing on "+ident+" text: "+ctx.getText());
-			});
-			
-			return template("index_call")
-					.add("name", identifier(identifier))
-					.add("arg_list", indexCont.visitAsIndex(ctx.index_expression_list(),this).get());
+			IdentifierType type = identType.getType(ident);
+			switch(type) {
+			case UNKNOWN:
+				ignore.ifPresent(set->{
+					if(!set.contains(ident))System.out.println("Indexing on "+ident+" text: "+ctx.getText());
+				});
+				//treat as ARRAY by default, fallthrough
+			case ARRAY:
+				return template("index_call")
+						.add("name", identifier(identifier))
+						.add("arg_list", indexCont.visitAsIndex(ctx.index_expression_list(),this).get());
+			case FUNCTION:
+				Fragment argList;
+				if(ctx.index_expression_list()!=null) {
+					argList=ctx.index_expression_list().accept(this);
+				} else {
+					argList=template("empty");
+				}
+				return template("function_call")
+						.add("name", identifier)
+						.add("arg_list", argList);
+			default:
+				throw new NullPointerException(ident+" returned type null");
+			}
 		}
 		
 		//otherwise used as a function call
@@ -637,9 +657,28 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 
 	@Override
 	public Fragment visitAssignment_expression(Assignment_expressionContext ctx) {
+		getIdentifier(ctx.postfix_expression()).ifPresent(ident->registerIdent(ident, ctx.expression()));
+		
 		return template("assignment_expression")
 					.add("postfix_expression", lhsCont.visitAsLhs(ctx.postfix_expression(),this).get())
 					.add("expression", ctx.expression().accept(this));
+	}
+	
+	private void registerIdent(String ident, ExpressionContext expression) {
+		if(expression.lambda_definition()!=null) {
+			//defining a lambda
+			identType.registerFunction(ident);
+		} else  {
+			//assume defining an array
+			identType.registerArray(ident);
+		}
+	}
+
+	private Optional<String> getIdentifier(Postfix_expressionContext post) {
+		return Optional.of(post)
+					.map(Postfix_expressionContext::primary_expression)
+					.map(Primary_expressionContext::IDENTIFIER)
+					.map(TerminalNode::getText);
 	}
 
 	@Override
