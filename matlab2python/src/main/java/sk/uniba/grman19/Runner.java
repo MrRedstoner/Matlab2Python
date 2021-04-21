@@ -23,7 +23,6 @@ import org.apache.commons.cli.ParseException;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-import sk.uniba.grman19.util.ErrorWrappingTranslator;
 import sk.uniba.grman19.util.Fragment;
 import sk.uniba.grman19.util.TreeUtils;
 
@@ -101,12 +100,7 @@ public class Runner {
 			ignoreList=Optional.of(new HashSet<String>(Arrays.asList(cmd.getOptionValue("indexlist").split(","))));
 		}
 		
-		PythonTranslatorVisitor ptv;
-		if(debug) {
-			ptv=new PythonTranslatorVisitor(templates,ignoreList);
-		} else {
-			ptv=new ErrorWrappingTranslator(templates,ignoreList);
-		}
+		PTVFactory ptv=new PTVFactory(debug, templates, ignoreList);
 		
 		if("-".equals(fromFile)) {
 			//read from stdin, output to stdout or -o if given
@@ -115,7 +109,7 @@ public class Runner {
 				try {
 					if(verbose)System.out.println("Translating stdin to stdout");
 					
-					boolean fine=translate(ptv,templates,CharStreams.fromStream(System.in),System.out);
+					boolean fine=translate(ptv.getNew(),templates,CharStreams.fromStream(System.in),System.out);
 					
 					if(!fine) {
 						if(verbose)System.out.println("There was an error");
@@ -135,7 +129,7 @@ public class Runner {
 				try {
 					if(verbose)System.out.println("Translating stdin to "+outFile.getAbsolutePath());
 					
-					boolean fine=translate(ptv,templates,CharStreams.fromStream(System.in),new PrintStream(outFile));
+					boolean fine=translate(ptv.getNew(),templates,CharStreams.fromStream(System.in),new PrintStream(outFile));
 					
 					if(!fine) {
 						if(verbose)System.out.println("There was an error");
@@ -174,7 +168,7 @@ public class Runner {
 					try {
 						if(verbose)System.out.println("Translating "+matlab.getAbsolutePath()+" to "+python.getAbsolutePath());
 						
-						boolean fileFine=translate(ptv,templates,CharStreams.fromPath(matlab.toPath()),new PrintStream(python));
+						boolean fileFine=translate(ptv.getNew(),templates,CharStreams.fromPath(matlab.toPath()),new PrintStream(python));
 						
 						if(!fileFine) {
 							if(verbose)System.out.println("There was an error");
@@ -207,7 +201,7 @@ public class Runner {
 				try {
 					if(verbose)System.out.println("Translating "+inFile.getAbsolutePath()+" to "+outFile.getAbsolutePath());
 					
-					boolean fine=translate(ptv,templates,CharStreams.fromPath(inFile.toPath()),new PrintStream(outFile));
+					boolean fine=translate(ptv.getNew(),templates,CharStreams.fromPath(inFile.toPath()),new PrintStream(outFile));
 					
 					if(!fine) {
 						if(verbose)System.out.println("There was an error");
