@@ -266,11 +266,11 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			"zeros", "sqrt", "title", "plot", "legend", "surfc",
 			"contour", "figure", "fplot", "rand", "abs", "ones",
 			"csvread", "exp", "log", "norm", "sum", "ezplot",
-			"mod", "eye"
+			"mod", "eye", "sin", "cos"
 			).collect(Collectors.toSet()));
 	
 	@Override
-	public Fragment visitArray_expression(Array_expressionContext ctx) {//TODO here
+	public Fragment visitArray_expression(Array_expressionContext ctx) {
 		//IDENTIFIER '(' index_expression_list ')'
 		String identifier = ctx.IDENTIFIER().getText();
 		
@@ -435,11 +435,14 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			ret.addImport(NUMPY);
 			identifier="np.eye";
 		}break;
-		//names used for functions
-		case"f":
-		case"df":
-		case"d2f":
-			break;
+		case"sin":{
+			ret.addImport(NUMPY);
+			identifier="np.sin";
+		}break;
+		case"cos":{
+			ret.addImport(NUMPY);
+			identifier="np.cos";
+		}break;
 		default:{
 			//should never happen is the knownFunctions set is correct
 			throw new RuntimeException("Default on function "+identifier);
