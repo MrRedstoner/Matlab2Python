@@ -1,6 +1,7 @@
 package sk.uniba.grman19;
 
 import static java.util.function.Predicate.isEqual;
+import static sk.uniba.grman19.util.FunctionUtils.compose;
 import static sk.uniba.grman19.util.PythonDef.ARRAY;
 import static sk.uniba.grman19.util.PythonDef.EZPLOT;
 import static sk.uniba.grman19.util.PythonDef.FPLOT;
@@ -19,6 +20,7 @@ import static sk.uniba.grman19.util.PythonImport.PYPLOT;
 import static sk.uniba.grman19.util.PythonImport.RANDOM;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -91,6 +93,8 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	}
 	
 	private static final Function<String,String>keywordTranform;
+	private static final Function<String, Optional<String>> simpleNumpyFunction;
+	private static final Function<String, Optional<String>> simplePyplotFunction;
 	
 	static {
 		Map<String,String> kt=Stream.of(
@@ -104,6 +108,22 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 				"while", "with", "yield"
 		).collect(Collectors.toMap(s->s, s->s+"_"));
 		keywordTranform=in->kt.getOrDefault(in,in);
+		
+		HashMap<String, String> simpleNp=new HashMap<>();
+		Stream.of(
+				"linspace", "meshgrid", "sqrt", "exp", "log", "mod", //could also use '%' instead of mod
+				"eye", "sin", "cos"
+		).forEach(s->simpleNp.put(s, "np."+s));
+		simpleNp.put("norm", "np.linalg.norm");
+		
+		simpleNumpyFunction=compose(simpleNp::get, Optional::ofNullable);
+
+		HashMap<String, String> simplePyplt=new HashMap<>();
+		Stream.of(
+				"pause", "title", "contour", "figure"
+		).forEach(s->simplePyplt.put(s, "plt."+s));
+		
+		simplePyplotFunction=compose(simplePyplt::get, Optional::ofNullable);
 	}
 	//TODO write more translator tests
 	
@@ -322,131 +342,85 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		}
 						
 		//add imports and defs as needed
-		switch(identifier) {
-		case"fprintf":{
-			ret.addImport(ITERTOOLS).addDef(PRINTF);
-			identifier="printf";
-		}break;
-		case"func2str":{
-			ret.addImport(INSPECT).addDef(FUNC2STR);
-		}break;
-		case"linspace":{
+		Optional<String> simpleNumpy=simpleNumpyFunction.apply(identifier);
+		Optional<String> simplePyplot=simplePyplotFunction.apply(identifier);
+		if(simpleNumpy.isPresent()) {
 			ret.addImport(NUMPY);
-			identifier="np.linspace";
-		}break;
-		case"meshgrid":{
-			ret.addImport(NUMPY);
-			identifier="np.meshgrid";
-		}break;
-		case"pause":{
+			identifier=simpleNumpy.get();
+		} else if(simplePyplot.isPresent()) {
 			ret.addImport(PYPLOT);
-			identifier="plt.pause";
-		}break;
-		case"size":{
-			ret.addDef(SIZE);
-		}break;
-		case"zeros":{
-			ret.addImport(NUMPY).addDef(ZEROS);
-		}break;
-		case"sqrt":{
-			ret.addImport(NUMPY);
-			identifier="np.sqrt";
-		}break;
-		case"title":{
-			ret.addImport(PYPLOT);
-			identifier="plt.title";
-		}break;
-		case"plot":{
-			ret.addImport(PYPLOT).addDef(PLOT);
-		}break;
-		case"legend":{
-			ret.addImport(PYPLOT);
-			identifier="plt.legend";
-			//wrap in []
-			argList=template("square_bracketed_expression").add("expression", argList);
-		}break;
-		case"surfc":{
-			ret.addImport(PYPLOT).addImport(AXES3D).addDef(SURFC);
-		}break;
-		case"contour":{
-			ret.addImport(PYPLOT);
-			identifier="plt.contour";
-		}break;
-		case"figure":{
-			ret.addImport(PYPLOT);
-			identifier="plt.figure";
-		}break;
-		case"ezplot":{
-			ret.addImport(NUMPY).addImport(PYPLOT).addDef(PLOT).addDef(EZPLOT);
-		}break;
-		case"fplot":{
-			ret.addImport(NUMPY).addImport(PYPLOT).addDef(PLOT).addDef(FPLOT);
-		}break;
-		case"rand":{
-			//assuming no-arg variant
-			doAssert(ctx.index_expression_list()==null);
-			ret.addImport(RANDOM);
-			identifier="random.random";
-		}break;
-		case"abs":{
-			//available as-is
-		}break;
-		case"ones":{
-			//skip last argument if it's a 1
-			if(Optional.of(ctx)
-				.map(Array_expressionContext::index_expression_list)
-				.map(Index_expression_listContext::index_expression)
-				.map(Index_expressionContext::getText)
-				.filter(isEqual("1"))
-				.isPresent()) {
-				argList=ctx.index_expression_list().index_expression_list().accept(this);
+			identifier=simplePyplot.get();
+		} else {
+			switch(identifier) {
+			case"fprintf":{
+				ret.addImport(ITERTOOLS).addDef(PRINTF);
+				identifier="printf";
+			}break;
+			case"func2str":{
+				ret.addImport(INSPECT).addDef(FUNC2STR);
+			}break;
+			case"size":{
+				ret.addDef(SIZE);
+			}break;
+			case"zeros":{
+				ret.addImport(NUMPY).addDef(ZEROS);
+			}break;
+			case"plot":{
+				ret.addImport(PYPLOT).addDef(PLOT);
+			}break;
+			case"legend":{
+				ret.addImport(PYPLOT);
+				identifier="plt.legend";
+				//wrap in []
+				argList=template("square_bracketed_expression").add("expression", argList);
+			}break;
+			case"surfc":{
+				ret.addImport(PYPLOT).addImport(AXES3D).addDef(SURFC);
+			}break;
+			case"ezplot":{
+				ret.addImport(NUMPY).addImport(PYPLOT).addDef(PLOT).addDef(EZPLOT);
+			}break;
+			case"fplot":{
+				ret.addImport(NUMPY).addImport(PYPLOT).addDef(PLOT).addDef(FPLOT);
+			}break;
+			case"rand":{
+				//assuming no-arg variant
+				doAssert(ctx.index_expression_list()==null);
+				ret.addImport(RANDOM);
+				identifier="random.random";
+			}break;
+			case"abs":{
+				//available as-is
+			}break;
+			case"ones":{
+				//skip last argument if it's a 1
+				if(Optional.of(ctx)
+					.map(Array_expressionContext::index_expression_list)
+					.map(Index_expression_listContext::index_expression)
+					.map(Index_expressionContext::getText)
+					.filter(isEqual("1"))
+					.isPresent()) {
+					argList=ctx.index_expression_list().index_expression_list().accept(this);
+				}
+				ret.addImport(NUMPY);
+				identifier="np.ones";
+			}break;
+			case"csvread":{
+				ret.addImport(NUMPY);
+				identifier="np.genfromtxt";
+				argList=template("comma_separated").add("list", argList).add("element", "delimiter=','");
+			}break;
+			case"sum":{
+				//assuming single-arg variant
+				doAssert(ctx.index_expression_list().index_expression_list()==null);
+				ret.addDef(M_SUM);
+				identifier="m_sum";
+			}break;
+			default:{
+				//should never happen is the knownFunctions set is correct
+				throw new RuntimeException("Default on function "+identifier);
 			}
-			ret.addImport(NUMPY);
-			identifier="np.ones";
-		}break;
-		case"csvread":{
-			ret.addImport(NUMPY);
-			identifier="np.genfromtxt";
-			argList=template("comma_separated").add("list", argList).add("element", "delimiter=','");
-		}break;
-		case"exp":{
-			ret.addImport(NUMPY);
-			identifier="np.exp";
-		}break;
-		case"log":{
-			ret.addImport(NUMPY);
-			identifier="np.log";
-		}break;
-		case"norm":{
-			ret.addImport(NUMPY);
-			identifier="np.linalg.norm";
-		}break;
-		case"sum":{
-			//assuming single-arg variant
-			doAssert(ctx.index_expression_list().index_expression_list()==null);
-			ret.addDef(M_SUM);
-			identifier="m_sum";
-		}break;
-		case"mod":{
-			ret.addImport(NUMPY);
-			identifier="np.mod";//could also use the % operator
-		}break;
-		case"eye":{
-			ret.addImport(NUMPY);
-			identifier="np.eye";
-		}break;
-		case"sin":{
-			ret.addImport(NUMPY);
-			identifier="np.sin";
-		}break;
-		case"cos":{
-			ret.addImport(NUMPY);
-			identifier="np.cos";
-		}break;
-		default:{
-			//should never happen is the knownFunctions set is correct
-			throw new RuntimeException("Default on function "+identifier);
-		}
+			}
 		}
 
 		return ret
