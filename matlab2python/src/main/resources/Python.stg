@@ -13,7 +13,7 @@ minus_one(expression) ::=<<
 >>
 
 plus_one(expression) ::=<<
-(<expression> + 1)
+((<expression>) + 1)
 >>
 
 bracketed_expression(expression) ::=<<

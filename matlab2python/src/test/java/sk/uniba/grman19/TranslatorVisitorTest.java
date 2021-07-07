@@ -469,6 +469,30 @@ public class TranslatorVisitorTest {
 	}
 	
 	@Test
+	public void add1ToRangeEvaluate() {
+		String input=program(true,
+				"a=1:5");
+		String output=program(false,
+				"a = np.array(range(1, 6))");
+		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
+		check(input,output,defs,imports);
+	}
+	
+	@Test
+	public void add1ToRange() {
+		String input=program(true,
+				"a=1:b",
+				"c=2:b+1");
+		String output=program(false,
+				"a = np.array(range(1, ((b) + 1)))",
+				"c = np.array(range(2, ((b + 1) + 1)))");
+		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
+		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
+		check(input,output,defs,imports);
+	}
+	
+	@Test
 	public void renameReservedWords() {
 		String input=program(true,
 				"a=5",

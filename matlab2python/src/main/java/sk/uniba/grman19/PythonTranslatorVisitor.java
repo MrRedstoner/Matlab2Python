@@ -26,9 +26,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
@@ -81,6 +83,7 @@ import sk.uniba.grman19.MatlabParser.Unary_operatorContext;
 import sk.uniba.grman19.util.ContextStack.IndexingContextStack;
 import sk.uniba.grman19.util.ContextStack.LhsContextStack;
 import sk.uniba.grman19.util.Fragment;
+import sk.uniba.grman19.util.FunctionUtils;
 import sk.uniba.grman19.util.IdentifierType;
 import sk.uniba.grman19.util.IdentifierTypeStorage;
 
@@ -612,6 +615,40 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
+	
+	Predicate<ParserRuleContext> SINGLE_CHILD = prc->prc.getChildCount()==1;
+	
+	private Fragment addOne(Or_expressionContext context) {
+		return Optional.of(context)
+			.filter(SINGLE_CHILD)
+			.map(Or_expressionContext::and_expression)
+			.filter(SINGLE_CHILD)
+			.map(And_expressionContext::equality_expression)
+			.filter(SINGLE_CHILD)
+			.map(Equality_expressionContext::relational_expression)
+			.filter(SINGLE_CHILD)
+			.map(Relational_expressionContext::additive_expression)
+			.filter(SINGLE_CHILD)
+			.map(Additive_expressionContext::multiplicative_expression)
+			.filter(SINGLE_CHILD)
+			.map(Multiplicative_expressionContext::array_mul_expression)
+			.filter(SINGLE_CHILD)
+			.map(Array_mul_expressionContext::unary_expression)
+			.filter(SINGLE_CHILD)
+			.map(Unary_expressionContext::postfix_expression)
+			.filter(SINGLE_CHILD)
+			.map(Postfix_expressionContext::primary_expression)
+			.filter(SINGLE_CHILD)
+			.map(Primary_expressionContext::CONSTANT)
+			.map(TerminalNode::getText)
+			.map(FunctionUtils::parseOrNull)
+			.map(i->i+1)
+			.map(Object::toString)
+			.map(this::literal)
+			.orElseGet(()->
+				template("plus_one")
+					.add("expression", context.accept(this)));
+	}
 
 	@Override
 	public Fragment visitExpression(ExpressionContext ctx) {
@@ -625,10 +662,12 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		} else {
 			//option expression ':' or_expression
 			//used as range, + 1 because matlab uses inclusive ranges
-			return template("range")
-						.add("start", ctx.expression().accept(this))
-						.add("stop", template("plus_one")
-								.add("expression", ctx.or_expression().accept(this)));
+			return template("function_call")
+						.addImport(NUMPY)
+						.add("name", "np.array")
+						.add("arg_list", template("range")
+								.add("start", ctx.expression().accept(this))
+								.add("stop", addOne(ctx.or_expression())));
 		}
 	}
 
