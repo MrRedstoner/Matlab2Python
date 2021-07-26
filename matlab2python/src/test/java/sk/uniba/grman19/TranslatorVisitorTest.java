@@ -255,9 +255,9 @@ public class TranslatorVisitorTest {
 	@Test
 	public void testLhsIndexing() {
 		String input=program(true,
-				"Z(1,2)=3");
+				"Z(1,i,3+4)=3");
 		String output=program(false,
-				"Z[(1 - 1), (2 - 1)] = 3");
+				"Z[0, ((i) - 1), ((3 + 4) - 1)] = 3");
 		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
 		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
 		check(input,output,defs,imports);
@@ -271,7 +271,7 @@ public class TranslatorVisitorTest {
 				"val=unknown(2)");
 		String output=program(false,
 				"unknown = array([1, 2, 3, 4])",
-				"val = unknown[(2 - 1)]");
+				"val = unknown[1]");
 		EnumSet<PythonDef> defs=EnumSet.of(PythonDef.ARRAY);
 		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
 		check(input,output,defs,imports);
@@ -295,7 +295,7 @@ public class TranslatorVisitorTest {
 		String input=program(true,
 				"val=unknown(:,1)");
 		String output=program(false,
-				"val = unknown[:, np.newaxis, (1 - 1)]");
+				"val = unknown[:, np.newaxis, 0]");
 		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
 		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
 		check(input,output,defs,imports);
@@ -323,8 +323,8 @@ public class TranslatorVisitorTest {
 				"v = data(:,1);");
 		String output=program(false,
 				"data = np.genfromtxt('data2.csv', delimiter=',')",
-				"u = array([np.ones(size(data, 1)), data[:, np.newaxis, (2 - 1)]])",
-				"v = data[:, np.newaxis, (1 - 1)]");
+				"u = array([np.ones(size(data, 1)), data[:, np.newaxis, 1]])",
+				"v = data[:, np.newaxis, 0]");
 		EnumSet<PythonDef> defs=EnumSet.of(PythonDef.ARRAY, PythonDef.SIZE);
 		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
 		check(input,output,defs,imports);
@@ -447,7 +447,7 @@ public class TranslatorVisitorTest {
 				"y=[X(1) X(3)]");
 		String output=program(false,
 				"x = array([0, 1, 2])",
-				"y = array([X[(1 - 1)], X[(3 - 1)]])");
+				"y = array([X[0], X[2]])");
 		EnumSet<PythonDef> defs=EnumSet.of(PythonDef.ARRAY);
 		EnumSet<PythonImport> imports=EnumSet.of(PythonImport.NUMPY);
 		check(input,output,defs,imports);
@@ -501,7 +501,7 @@ public class TranslatorVisitorTest {
 		String output=program(false,
 				"a = 5",
 				"del_ = 6",
-				"del_[(1 - 1)]");
+				"del_[0]");
 		EnumSet<PythonDef> defs=EnumSet.noneOf(PythonDef.class);
 		EnumSet<PythonImport> imports=EnumSet.noneOf(PythonImport.class);
 		check(input,output,defs,imports);

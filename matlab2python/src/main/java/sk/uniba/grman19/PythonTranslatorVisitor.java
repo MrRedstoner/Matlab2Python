@@ -254,13 +254,47 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		throw new UnsupportedOperationException();
 	}
 
+	private Fragment subOne(ExpressionContext context) {
+		return Optional.of(context)
+			.filter(SINGLE_CHILD)
+			.map(ExpressionContext::or_expression)
+			.filter(SINGLE_CHILD)
+			.map(Or_expressionContext::and_expression)
+			.filter(SINGLE_CHILD)
+			.map(And_expressionContext::equality_expression)
+			.filter(SINGLE_CHILD)
+			.map(Equality_expressionContext::relational_expression)
+			.filter(SINGLE_CHILD)
+			.map(Relational_expressionContext::additive_expression)
+			.filter(SINGLE_CHILD)
+			.map(Additive_expressionContext::multiplicative_expression)
+			.filter(SINGLE_CHILD)
+			.map(Multiplicative_expressionContext::array_mul_expression)
+			.filter(SINGLE_CHILD)
+			.map(Array_mul_expressionContext::unary_expression)
+			.filter(SINGLE_CHILD)
+			.map(Unary_expressionContext::postfix_expression)
+			.filter(SINGLE_CHILD)
+			.map(Postfix_expressionContext::primary_expression)
+			.filter(SINGLE_CHILD)
+			.map(Primary_expressionContext::CONSTANT)
+			.map(TerminalNode::getText)
+			.map(FunctionUtils::parseOrNull)
+			.map(i->i-1)
+			.map(Object::toString)
+			.map(this::literal)
+			.orElseGet(()->
+				template("minus_one")
+					.add("expression", indexCont.visitAsNonIndex(context,this).get()));
+	}
+
 	@Override
 	public Fragment visitIndex_expression(Index_expressionContext ctx) {
 		if(ctx.expression()!=null) {
 			//option expression
 			if(indexCont.isIndexing()) {
 				//correct for difference in indexing
-				return template("minus_one").add("expression", indexCont.visitAsNonIndex(ctx.expression(),this).get());
+				return subOne(ctx.expression());
 			} else {
 				return ctx.expression().accept(this);
 			}

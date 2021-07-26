@@ -9,7 +9,7 @@ fullTranslation(imports,defs,translation_unit) ::=<<
 >>
 
 minus_one(expression) ::=<<
-(<expression> - 1)
+((<expression>) - 1)
 >>
 
 plus_one(expression) ::=<<
