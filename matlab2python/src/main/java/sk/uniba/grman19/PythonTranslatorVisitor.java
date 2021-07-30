@@ -115,9 +115,12 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 		HashMap<String, String> simpleNp=new HashMap<>();
 		Stream.of(
 				"linspace", "meshgrid", "sqrt", "exp", "log", "mod", //could also use '%' instead of mod
-				"eye", "sin", "cos"
+				"eye", "sin", "cos", "tan"
 		).forEach(s->simpleNp.put(s, "np."+s));
 		simpleNp.put("norm", "np.linalg.norm");
+		simpleNp.put("asin", "np.arcsin");
+		simpleNp.put("acos", "np.arccos");
+		simpleNp.put("atan", "np.arctan");
 		
 		simpleNumpyFunction=compose(simpleNp::get, Optional::ofNullable);
 
@@ -323,7 +326,8 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 			"zeros", "sqrt", "title", "plot", "legend", "surfc",
 			"contour", "figure", "fplot", "rand", "abs", "ones",
 			"csvread", "exp", "log", "norm", "sum", "ezplot",
-			"mod", "eye", "sin", "cos"
+			"mod", "eye", "sin", "cos", "tan", "asin",
+			"acos", "atan", "cot"
 			).collect(Collectors.toSet()));
 	
 	@Override
@@ -452,6 +456,16 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 				doAssert(ctx.index_expression_list().index_expression_list()==null);
 				ret.addDef(M_SUM);
 				identifier="m_sum";
+			}break;
+			case"cot":{
+				//need to use 1/tan
+				ret.addImport(NUMPY);
+				argList=template("comma_separated_elems")
+							.add("element", "1")
+							.add("element", template("function_call")
+								.add("name", "np.tan")
+								.add("arg_list", argList));
+				identifier="np.divide";
 			}break;
 			default:{
 				//should never happen is the knownFunctions set is correct
