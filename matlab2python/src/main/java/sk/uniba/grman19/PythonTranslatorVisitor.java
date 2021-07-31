@@ -2,6 +2,7 @@ package sk.uniba.grman19;
 
 import static java.util.function.Predicate.isEqual;
 import static sk.uniba.grman19.util.FunctionUtils.compose;
+import static sk.uniba.grman19.util.PureConstantExtractorVisitor.PCEV;
 import static sk.uniba.grman19.util.PythonDef.ARRAY;
 import static sk.uniba.grman19.util.PythonDef.EZPLOT;
 import static sk.uniba.grman19.util.PythonDef.FPLOT;
@@ -258,29 +259,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	}
 
 	private Fragment subOne(ExpressionContext context) {
-		return Optional.of(context)
-			.filter(SINGLE_CHILD)
-			.map(ExpressionContext::or_expression)
-			.filter(SINGLE_CHILD)
-			.map(Or_expressionContext::and_expression)
-			.filter(SINGLE_CHILD)
-			.map(And_expressionContext::equality_expression)
-			.filter(SINGLE_CHILD)
-			.map(Equality_expressionContext::relational_expression)
-			.filter(SINGLE_CHILD)
-			.map(Relational_expressionContext::additive_expression)
-			.filter(SINGLE_CHILD)
-			.map(Additive_expressionContext::multiplicative_expression)
-			.filter(SINGLE_CHILD)
-			.map(Multiplicative_expressionContext::array_mul_expression)
-			.filter(SINGLE_CHILD)
-			.map(Array_mul_expressionContext::unary_expression)
-			.filter(SINGLE_CHILD)
-			.map(Unary_expressionContext::postfix_expression)
-			.filter(SINGLE_CHILD)
-			.map(Postfix_expressionContext::primary_expression)
-			.filter(SINGLE_CHILD)
-			.map(Primary_expressionContext::CONSTANT)
+		return context.accept(PCEV)
 			.map(TerminalNode::getText)
 			.map(FunctionUtils::parseOrNull)
 			.map(i->i-1)
@@ -667,27 +646,7 @@ public class PythonTranslatorVisitor implements MatlabVisitor<Fragment> {
 	Predicate<ParserRuleContext> SINGLE_CHILD = prc->prc.getChildCount()==1;
 	
 	private Fragment addOne(Or_expressionContext context) {
-		return Optional.of(context)
-			.filter(SINGLE_CHILD)
-			.map(Or_expressionContext::and_expression)
-			.filter(SINGLE_CHILD)
-			.map(And_expressionContext::equality_expression)
-			.filter(SINGLE_CHILD)
-			.map(Equality_expressionContext::relational_expression)
-			.filter(SINGLE_CHILD)
-			.map(Relational_expressionContext::additive_expression)
-			.filter(SINGLE_CHILD)
-			.map(Additive_expressionContext::multiplicative_expression)
-			.filter(SINGLE_CHILD)
-			.map(Multiplicative_expressionContext::array_mul_expression)
-			.filter(SINGLE_CHILD)
-			.map(Array_mul_expressionContext::unary_expression)
-			.filter(SINGLE_CHILD)
-			.map(Unary_expressionContext::postfix_expression)
-			.filter(SINGLE_CHILD)
-			.map(Postfix_expressionContext::primary_expression)
-			.filter(SINGLE_CHILD)
-			.map(Primary_expressionContext::CONSTANT)
+		return context.accept(PCEV)
 			.map(TerminalNode::getText)
 			.map(FunctionUtils::parseOrNull)
 			.map(i->i+1)
